@@ -1,58 +1,71 @@
-automationexercise
+# automationexercise — Skeleton
 
-Automation framework for testing the Automation Exercise
- web application.
+This is the **skeleton-only** version of the `automationexercise`
+framework.
 
-The framework will be implemented using Java, Selenium WebDriver, TestNG, Maven, and the Page Object Model (POM).
+The purpose of this project is to provide the initial structure in which the
+complete automation framework will be created and implemented. The framework
+will be developed using **Java, Selenium WebDriver, TestNG, Maven, and the Page Object Model (POM).**
 
-Technologies
-Java — programming language
-Selenium WebDriver — browser automation
-TestNG — test execution and assertions
-Maven — dependency and build management
-Page Object Model (POM) — test architecture and maintainability
-Project Goal
+It preserves the project structure, Maven/TestNG/Surefire configuration,
+Jenkinsfile, resources, packages, classes, annotations, PageFactory locators,
+fields, method signatures, and the four requested test classes.
 
-The purpose of this project is to build a maintainable and scalable UI automation framework for the Automation Exercise application.
+The existing structure serves as the foundation for implementing the complete
+framework, including page objects, reusable components, test scenarios,
+validations, configuration, test data, reporting, and CI/CD execution.
 
-The framework will cover application functionality through automated end-to-end tests while keeping test logic, page interactions, configuration, and reusable utilities properly separated.
 
-Planned Features
-Page Object Model architecture
-Automated UI test cases
-Cross-browser test execution
-Reusable WebDriver and test utilities
-Test configuration management
-Test data management
-Assertions and validations
-Test reporting
-Logging
-Maven-based test execution
-CI/CD integration
-Getting Started
-Prerequisites
+The existing structure serves as the foundation for implementing the complete
+framework. It is intended to help the team consistently construct and extend
+the automation framework based on the defined architecture and project
+structure.
 
-Make sure the following are installed:
+The framework will be implemented with page objects, reusable components,
+test scenarios, validations, configuration, test data, reporting, and CI/CD
+execution.
 
-Java
-Maven
-A supported web browser
+Java method and constructor implementations have been intentionally replaced
+with:
+```java
+// TODO: implement.
+throw new UnsupportedOperationException("TODO");
+```
 
-Verify the installations:
+This keeps the architecture, class structure, method signatures, and intended
+responsibilities visible while leaving the actual implementation for the
+automation team to build on top of the provided framework structure.
 
-java -version
-mvn -version
+## Test cases
 
-Running Tests
+- Test Case 1 — Register User
+- Test Case 9 — Search Product
+- Test Case 16 — Place Order: Login before Checkout
+- Test Case 25 — Verify Scroll Up using Arrow button
 
-Tests can be executed with Maven:
+## Project structure
 
-mvn clean test
+```text
+automationexercise/
+├── pom.xml
+├── testng.xml
+├── Jenkinsfile
+├── .run/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── config/
+│   │   │   ├── factory/
+│   │   │   ├── features/
+│   │   │   ├── listeners/
+│   │   │   ├── models/
+│   │   │   ├── pages/
+│   │   │   └── utils/
+│   │   └── resources/
+│   └── test/
+│       └── java/
+│           └── tests/
+└── ...
+```
 
-Application Under Test
-
-The automation framework targets:
-
-Automation Exercise — https://automationexercise.com/
-
-The implementation will be developed incrementally as new pages, features, and test scenarios are added to the framework.
+Use this version as the starting point for constructing and implementing the automation framework. It provides the defined architecture and project structure that the team should follow while developing the complete framework.

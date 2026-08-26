@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Maven configuration for the Automation Exercise UI framework.
+    The project contains only the four requested automated test cases:
+    1, 9, 16 and 25.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.suren.qa</groupId>
+    <artifactId>automationexercise</artifactId>
+    <version>1.0.0</version>
+    <name>automationexercise</name>
+
+    <properties>
+        <!-- Java 17 is an LTS version suitable for the framework. -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency versions are centralized for easy maintenance. -->
+        <selenium.version>4.35.0</selenium.version>
+        <testng.version>7.11.0</testng.version>
+        <allure.version>2.29.1</allure.version>
+        <log4j.version>2.25.1</log4j.version>
+
+        <!-- Runtime defaults. These may be overridden with -D properties. -->
+        <browser>chrome</browser>
+        <headless>false</headless>
+        <environment>qa</environment>
+        <!-- Default TestNG thread count; override with -Dthread.count=X. -->
+        <thread.count>2</thread.count>
+        <!-- Local/remote execution label for suite lifecycle logs. -->
+        <execution.mode>local</execution.mode>
+    </properties>
+
+    <dependencies>
+        <!-- Selenium WebDriver and PageFactory APIs. -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- TestNG test runner and assertions. -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Allure integration for TestNG. -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+        </dependency>
+
+        <!-- Log4j2 API and implementation. -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Compiles project source code. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+            </plugin>
+
+            <!-- Executes the four TestNG tests through testng.xml. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+
+                <configuration>
+
+                    <!-- Execute the existing TestNG suite definition. -->
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+
+                    <!-- Keep TestNG/test output visible in Maven console. -->
+                    <useFile>false</useFile>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <printSummary>true</printSummary>
+
+                    <!-- Keep complete stack traces when tests fail. -->
+                    <trimStackTrace>false</trimStackTrace>
+
+                    <!-- Pass framework runtime values into the TestNG JVM. -->
+                    <systemPropertyVariables>
+                        <browser>${browser}</browser>
+                        <environment>${environment}</environment>
+                        <headless>${headless}</headless>
+                        <thread.count>${thread.count}</thread.count>
+                        <execution.mode>${execution.mode}</execution.mode>
+                    </systemPropertyVariables>
+
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Environment profiles are retained for CI extensibility. -->
+    <profiles>
+        <profile>
+            <id>qa</id>
+            <properties>
+                <environment>qa</environment>
+            </properties>
+        </profile>
+        <profile>
+            <id>stage</id>
+            <properties>
+                <environment>stage</environment>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <environment>prod</environment>
+            </properties>
+        </profile>
+    </profiles>
+</project>
