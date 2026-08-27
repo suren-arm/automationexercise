@@ -12,33 +12,24 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 /**
- * Thread-safe WebDriver factory.
- *
- * <p>No test class creates WebDriver directly. The factory owns browser
- * initialization, browser selection, configuration, access and cleanup.</p>
+ * Owns the WebDriver for each test thread. Held in a {@link ThreadLocal} so
+ * TestNG can run classes in parallel without sharing a browser.
  */
 public final class DriverFactory {
 
-    /** Framework logger. */
     private static final Logger LOG = LogManager.getLogger(DriverFactory.class);
 
-    /** One WebDriver instance per TestNG worker thread. */
     private static final ThreadLocal<WebDriver> DRIVER = new ThreadLocal<>();
 
-    /** Static utility class. */
     private DriverFactory() {
     }
 
-    /**
-     * Creates the configured browser.
-     *
-     * @return current thread's WebDriver
-     */
+    /** Creates the configured browser for the current thread. */
     public static WebDriver createDriver() {
         String browser = ConfigReader.browser().trim().toLowerCase();
         boolean headless = ConfigReader.headless();
 
-        WebDriver webDriver = switch (browser) {
+        WebDriver driver = switch (browser) {
             case "chrome" -> createChrome(headless);
             case "firefox", "gecko" -> createFirefox(headless);
             case "edge" -> createEdge(headless);
@@ -47,82 +38,88 @@ public final class DriverFactory {
                             + ". Supported values: chrome, firefox/gecko, edge.");
         };
 
-        DRIVER.set(webDriver);
-        webDriver.manage().deleteAllCookies();
+        DRIVER.set(driver);
+
+        // A clean session per test: no cookie may carry a login between tests.
+        driver.manage().deleteAllCookies();
 
         if (!headless) {
-            webDriver.manage().window().maximize();
+            driver.manage().window().maximize();
         }
 
-        LOG.info("Created {} driver. Thread={}", browser, Thread.currentThread().getName());
-        return webDriver;
+        LOG.info("Created {} driver (headless={}) on thread {}",
+                browser, headless, Thread.currentThread().getName());
+
+        return driver;
     }
 
-    /** Creates ChromeDriver with framework options. */
     private static WebDriver createChrome(boolean headless) {
         ChromeOptions options = new ChromeOptions();
 
         if (headless) {
-            options.addArguments("--headless=new");
+            // A fixed window size keeps headless layout comparable to headed,
+            // which matters for scroll-dependent behaviour.
+            options.addArguments("--headless=new", "--window-size=1920,1080");
         }
 
         options.addArguments("--disable-notifications");
         return new ChromeDriver(options);
     }
 
-    /** Creates FirefoxDriver/GeckoDriver with framework options. */
     private static WebDriver createFirefox(boolean headless) {
         FirefoxOptions options = new FirefoxOptions();
 
         if (headless) {
-            options.addArguments("-headless");
+            options.addArguments("-headless", "--width=1920", "--height=1080");
         }
 
         return new FirefoxDriver(options);
     }
 
-    /** Creates EdgeDriver with framework options. */
     private static WebDriver createEdge(boolean headless) {
         EdgeOptions options = new EdgeOptions();
 
         if (headless) {
-            options.addArguments("--headless=new");
+            options.addArguments("--headless=new", "--window-size=1920,1080");
         }
 
         options.addArguments("--disable-notifications");
         return new EdgeDriver(options);
     }
 
-    /**
-     * Returns the current thread's driver.
-     *
-     * @return current WebDriver
-     */
-    public static WebDriver getDriver() {
-        WebDriver webDriver = DRIVER.get();
+    /** Whether this thread currently has a driver. */
+    public static boolean hasDriver() {
+        return DRIVER.get() != null;
+    }
 
-        if (webDriver == null) {
+    /** Returns this thread's driver. */
+    public static WebDriver getDriver() {
+        WebDriver driver = DRIVER.get();
+
+        if (driver == null) {
             throw new IllegalStateException(
-                    "WebDriver has not been initialized for the current thread.");
+                    "WebDriver has not been initialised for thread "
+                            + Thread.currentThread().getName() + ".");
         }
 
-        return webDriver;
+        return driver;
     }
 
     /**
-     * Quits and removes the current thread's WebDriver.
-     *
-     * <p>ThreadLocal.remove() avoids stale references when TestNG worker
-     * threads are reused.</p>
+     * {@code remove()} runs in a {@code finally} so the slot is cleared even if
+     * {@code quit()} fails - TestNG reuses worker threads, and a stale reference
+     * would be handed to the next test.
      */
     public static void quitDriver() {
-        WebDriver webDriver = DRIVER.get();
+        WebDriver driver = DRIVER.get();
+
+        if (driver == null) {
+            return;
+        }
 
         try {
-            if (webDriver != null) {
-                webDriver.quit();
-                LOG.info("Driver closed. Thread={}", Thread.currentThread().getName());
-            }
+            driver.quit();
+            LOG.info("Driver closed on thread {}", Thread.currentThread().getName());
         } finally {
             DRIVER.remove();
         }

@@ -27,14 +27,21 @@
         <allure.version>2.29.1</allure.version>
         <log4j.version>2.25.1</log4j.version>
 
-        <!-- Runtime defaults. These may be overridden with -D properties. -->
-        <browser>chrome</browser>
-        <headless>false</headless>
-        <environment>qa</environment>
-        <!-- Default TestNG thread count; override with -Dthread.count=X. -->
-        <thread.count>2</thread.count>
-        <!-- Local/remote execution label for suite lifecycle logs. -->
-        <execution.mode>local</execution.mode>
+        <!--
+            Deliberately empty. These are forwarded to the test JVM below so that
+            -Dbrowser=firefox / -Dheadless=true / -DLOG_LEVEL=DEBUG work on the
+            command line. Giving them values here instead would mean the build
+            always passed a system property, which takes precedence in
+            ConfigReader and would make config.properties impossible to change
+            in any meaningful way. Blank values are ignored, so the file stays
+            the source of the defaults.
+        -->
+        <browser/>
+        <headless/>
+        <LOG_LEVEL/>
+        <explicit.wait.seconds/>
+        <base.url/>
+        <thread.count/>
     </properties>
 
     <dependencies>
@@ -45,12 +52,15 @@
             <version>${selenium.version}</version>
         </dependency>
 
-        <!-- TestNG test runner and assertions. -->
+        <!--
+            TestNG is declared once, at compile scope, because the reusable
+            listeners in src/main/java implement TestNG interfaces and therefore
+            need the API on the main compile classpath - not only at test time.
+        -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Allure integration for TestNG. -->
@@ -70,12 +80,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.12.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -109,39 +113,22 @@
                     <!-- Keep complete stack traces when tests fail. -->
                     <trimStackTrace>false</trimStackTrace>
 
-                    <!-- Pass framework runtime values into the TestNG JVM. -->
+                    <!--
+                        Forward command-line overrides into the forked test JVM.
+                        Blank unless supplied with -D, in which case
+                        config.properties provides the value.
+                    -->
                     <systemPropertyVariables>
                         <browser>${browser}</browser>
-                        <environment>${environment}</environment>
                         <headless>${headless}</headless>
+                        <LOG_LEVEL>${LOG_LEVEL}</LOG_LEVEL>
+                        <explicit.wait.seconds>${explicit.wait.seconds}</explicit.wait.seconds>
+                        <base.url>${base.url}</base.url>
                         <thread.count>${thread.count}</thread.count>
-                        <execution.mode>${execution.mode}</execution.mode>
                     </systemPropertyVariables>
 
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <!-- Environment profiles are retained for CI extensibility. -->
-    <profiles>
-        <profile>
-            <id>qa</id>
-            <properties>
-                <environment>qa</environment>
-            </properties>
-        </profile>
-        <profile>
-            <id>stage</id>
-            <properties>
-                <environment>stage</environment>
-            </properties>
-        </profile>
-        <profile>
-            <id>prod</id>
-            <properties>
-                <environment>prod</environment>
-            </properties>
-        </profile>
-    </profiles>
 </project>

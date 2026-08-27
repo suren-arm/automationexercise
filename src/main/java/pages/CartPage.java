@@ -1,42 +1,44 @@
 package pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 /**
- * Shopping cart page used only by TC16.
+ * Shopping cart page.
  */
 public class CartPage extends BasePage {
+
     /**
-     * Creates the CartPage Page Object.
-     *
-     * <p>Calling super() invokes the BasePage constructor, which:
-     * gets the thread-safe driver, creates waits, checks the Google vignette,
-     * creates reusable action wrappers, and initializes this page's @FindBy
-     * elements through PageFactory.</p>
+     * Matches the breadcrumb by class token rather than an exact {@code @class}
+     * comparison, so an extra class on the element cannot break the locator.
      */
-    public CartPage() {
-        super();
-    }
-
-
-    /** Shopping Cart breadcrumb/heading. */
-    @FindBy(xpath = "//li[@class='active' and normalize-space()='Shopping Cart']")
+    @FindBy(xpath = "//li[contains(concat(' ', normalize-space(@class), ' '), ' active ')"
+            + " and normalize-space()='Shopping Cart']")
     private WebElement heading;
 
-    /** Proceed To Checkout button. */
-    @FindBy(xpath = "//a[contains(normalize-space(),'Proceed To Checkout')]")
+    @FindBy(css = "a.check_out")
     private WebElement proceedToCheckout;
 
-    /** Returns whether cart page is displayed. */
-    public boolean isVisible() {
+    /**
+     * Product rows of the cart table. Matched on the per-product row id so the
+     * same locator holds on the cart and checkout pages, which wrap the table
+     * in differently named containers.
+     */
+    private static final By CART_PRODUCT_ROWS = By.cssSelector("tr[id^='product-']");
 
+    /** Whether the cart page is displayed. */
+    public boolean isVisible() {
         return actions.isDisplayed(heading);
     }
 
-    /** Proceeds from Cart to Checkout. */
-    public CheckoutPage proceedToCheckout() {
+    /** Number of product rows currently in the cart. */
+    public int getItemCount() {
+        return actions.getTexts(CART_PRODUCT_ROWS).size();
+    }
 
+    /** Proceeds from the cart to checkout. */
+    public CheckoutPage proceedToCheckout() {
         actions.click(proceedToCheckout);
         return new CheckoutPage();
     }

@@ -1,66 +1,68 @@
 package pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 /**
- * Checkout page used by TC16.
- *
- * <p>The official case verifies Address Details and Review Your Order, enters
- * a comment, then continues to payment.</p>
+ * Checkout page: address details, order review and the order comment.
  */
 public class CheckoutPage extends BasePage {
-    /**
-     * Creates the CheckoutPage Page Object.
-     *
-     * <p>Calling super() invokes the BasePage constructor, which:
-     * gets the thread-safe driver, creates waits, checks the Google vignette,
-     * creates reusable action wrappers, and initializes this page's @FindBy
-     * elements through PageFactory.</p>
-     */
-    public CheckoutPage() {
-        super();
-    }
 
-
-    /** Address Details heading. */
     @FindBy(xpath = "//h2[normalize-space()='Address Details']")
-    private WebElement addressDetails;
+    private WebElement addressDetailsHeading;
 
-    /** Review Your Order heading. */
     @FindBy(xpath = "//h2[normalize-space()='Review Your Order']")
-    private WebElement reviewOrder;
+    private WebElement reviewOrderHeading;
 
-    /** Order comment text area. */
+    @FindBy(id = "address_delivery")
+    private WebElement deliveryAddress;
+
     @FindBy(name = "message")
     private WebElement comment;
 
-    /** Place Order button. */
-    @FindBy(xpath = "//a[contains(normalize-space(),'Place Order')]")
+    /**
+     * Located by its destination rather than its label: the href is part of the
+     * checkout flow itself, whereas the button text is presentational.
+     */
+    @FindBy(css = "a[href='/payment']")
     private WebElement placeOrder;
 
-    /** Returns whether Address Details is visible. */
+    /**
+     * Matched on the row id, not the table's: the wrapper is {@code #cart_info}
+     * here but {@code #cart_info_table} on the cart page, and the tbody also
+     * holds a totals row.
+     */
+    private static final By REVIEW_PRODUCT_ROWS = By.cssSelector("tr[id^='product-']");
+
+    /** Whether the Address Details section is displayed. */
     public boolean isAddressDetailsVisible() {
-
-        return actions.isDisplayed(addressDetails);
+        return actions.isDisplayed(addressDetailsHeading);
     }
 
-    /** Returns whether Review Your Order is visible. */
+    /** Whether the Review Your Order section is displayed. */
     public boolean isReviewOrderVisible() {
-
-        return actions.isDisplayed(reviewOrder);
+        return actions.isDisplayed(reviewOrderHeading);
     }
 
-    /** Enters order comment. */
-    public CheckoutPage enterComment(String text) {
+    /** Delivery address block text, used to confirm the address is populated. */
+    public String getDeliveryAddressText() {
+        return actions.getText(deliveryAddress);
+    }
 
+    /** Number of products listed in the order review. */
+    public int getReviewedItemCount() {
+        return actions.getTexts(REVIEW_PRODUCT_ROWS).size();
+    }
+
+    /** Enters the order comment. */
+    public CheckoutPage enterComment(String text) {
         actions.type(comment, text);
         return this;
     }
 
-    /** Opens payment form. */
+    /** Submits the order and opens the payment form. */
     public PaymentPage placeOrder() {
-
         actions.click(placeOrder);
         return new PaymentPage();
     }

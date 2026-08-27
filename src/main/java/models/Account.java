@@ -1,12 +1,12 @@
 package models;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Immutable user-account test data model.
- *
- * <p>Every test can create a fresh Account through the Builder. Valid defaults
- * keep tests short, while individual fields can be overridden when required.</p>
+ * Immutable account test data. Every builder produces a unique email, which is
+ * what keeps the registration scenarios repeatable and safe to run in parallel.
  */
 public final class Account {
 
@@ -79,16 +79,23 @@ public final class Account {
     public String getMobileNumber() { return mobileNumber; }
 
     /**
-     * Builder with valid defaults.
-     *
-     * <p>The email is unique for every Builder instance so registration tests
-     * can be repeated without collisions.</p>
+     * Builder with valid defaults for the Automation Exercise registration
+     * form. Any field can be overridden; the email normally should not be.
      */
     public static final class Builder {
 
+        private static final DateTimeFormatter TIMESTAMP =
+                DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
+        /**
+         * Distinguishes accounts created inside the same millisecond, which a
+         * timestamp alone cannot do when tests run in parallel.
+         */
+        private static final AtomicInteger SEQUENCE = new AtomicInteger();
+
         private String title = "Mr";
         private String name = "Automation User";
-        private String email = "qa." + UUID.randomUUID() + "@example.com";
+        private String email = uniqueEmail();
         private String password = "Password123!";
         private String day = "10";
         private String month = "May";
@@ -125,6 +132,14 @@ public final class Account {
         public Builder city(String value) { city = value; return this; }
         public Builder zipCode(String value) { zipCode = value; return this; }
         public Builder mobileNumber(String value) { mobileNumber = value; return this; }
+
+        /** Unique per run, so registration never hits "email already exists". */
+        private static String uniqueEmail() {
+            return "automation."
+                    + LocalDateTime.now().format(TIMESTAMP)
+                    + "." + SEQUENCE.incrementAndGet()
+                    + "@example.com";
+        }
 
         /** Creates the immutable Account. */
         public Account build() {

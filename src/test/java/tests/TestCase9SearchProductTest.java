@@ -1,51 +1,67 @@
 package tests;
 
-import config.ConfigReader;
-import io.qameta.allure.*;
-import org.testng.Assert;
+import config.TestData;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.testng.annotations.Test;
+import pages.HomePage;
 import tests.base.BaseTest;
 
-/**
- * Official Automation Exercise Test Case 9 - Search Product.
- */
+import java.util.List;
+import java.util.Locale;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 @Epic("Automation Exercise")
 @Feature("Test Case 9")
 public class TestCase9SearchProductTest extends BaseTest {
 
     /**
-     * Executes TC9 exactly:
-     * Home -> Products -> Search -> verify Search Products and matching results.
+     * Searches the product catalogue and confirms the results section appears
+     * and every product returned matches the search term.
+     *
+     * <p>The browser is launched and the site opened by {@code BaseTest}.</p>
      */
     @Test(description = "Test Case 9: Search Product")
     @Story("Search Product")
     @Severity(SeverityLevel.NORMAL)
-    public void testCase9SearchProduct() {
-        var home = pages.home();
+    public void searchProduct() {
+        String searchTerm = TestData.searchProduct();
 
+        HomePage home = homePage();
+
+        assertTrue(home.isVisible(),
+                "Home page should be visible after navigating to the base URL.");
+
+        // Open the catalogue
         var products = home.goToProducts();
 
-        Assert.assertTrue(
-                products.isVisible(),
-                "ALL PRODUCTS should be visible.");
+        assertTrue(products.isVisible(),
+                "'ALL PRODUCTS' should be visible after clicking Products.");
 
-        String productName = ConfigReader.get("search.product");
+        // Search
+        products.search(searchTerm);
 
-        products.search(productName);
+        assertTrue(products.isSearchResultVisible(),
+                "'SEARCHED PRODUCTS' should be visible after running a search.");
 
-        Assert.assertTrue(
-                products.isSearchResultVisible(),
-                "SEARCHED PRODUCTS should be visible.");
+        // Every result must relate to the term - asserting only on the heading
+        // would pass even if the site returned the unfiltered catalogue
+        List<String> resultNames = products.getResultNames();
 
-        var resultNames = products.getResultNames();
+        assertFalse(resultNames.isEmpty(),
+                "Search for '" + searchTerm + "' should return at least one product.");
 
-        Assert.assertFalse(
-                resultNames.isEmpty(),
-                "Search should return at least one product.");
+        String expected = searchTerm.toLowerCase(Locale.ROOT);
 
-        resultNames.forEach(name ->
-                Assert.assertTrue(
-                        name.toLowerCase().contains(productName.toLowerCase()),
-                        "Product '" + name + "' is unrelated to search '" + productName + "'."));
+        for (String name : resultNames) {
+            assertTrue(name.toLowerCase(Locale.ROOT).contains(expected),
+                    "Search returned '" + name + "', which is unrelated to '"
+                            + searchTerm + "'. All results: " + resultNames);
+        }
     }
 }

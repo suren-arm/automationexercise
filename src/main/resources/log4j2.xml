@@ -1,95 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Thread-safe Log4j2 configuration.
+    Logging for parallel TestNG execution.
 
-    Logs are written to:
-        logs/automation.log
+    Every appender here is thread-safe: Log4j2 serialises writes, so multiple
+    TestNG workers can share the same file safely.
 
-    Rolled logs are stored under:
-        logs/archive/
+    Two things make an interleaved parallel run readable:
+      %t            the worker thread that emitted the line
+      %X{testName}  the test that thread was running at the time, published by
+                    BaseTest into Log4j2's ThreadContext (its MDC)
 
-    Log4j2 appenders are designed for concurrent use, so multiple TestNG
-    worker threads can safely write to the same rolling log file.
+    Note %X{testName} and NOT %X{testName:-}. The ":-" default syntax belongs to
+    ${ctx:...} lookups; inside %X{} it is read as part of the key name, so
+    "%X{testName:-}" silently looks up a key that is never set and every line
+    renders blank.
 
-    Pattern fields:
-        [%t]              -> Java/TestNG worker thread name
-        [%X{testName}]    -> current TestNG test method from ThreadContext
+    The root level below is only the bootstrap value - LoggingConfigurator
+    replaces it at startup with LOG_LEVEL from config.properties.
 -->
 <Configuration status="WARN">
 
     <Properties>
-        <!--
-            Keep the log location outside target/ so `mvn clean` does not
-            delete previous local execution logs.
-        -->
+        <!-- Kept outside target/ so `mvn clean` does not delete previous runs. -->
         <Property name="LOG_DIR">logs</Property>
 
-        <!--
-            Thread + test name make parallel execution easy to diagnose.
-            When no test context is active, testName is displayed as "-".
-        -->
-        <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] [test=%X{testName:-}] %c{1} - %msg%n
-        </Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%X{testName}] %-5level %c{1} - %msg%n</Property>
     </Properties>
 
     <Appenders>
 
-        <!-- Human-readable console output. -->
-        <Console name="Console"
-                 target="SYSTEM_OUT">
-
+        <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${LOG_PATTERN}"/>
-
         </Console>
 
-        <!--
-            Thread-safe rolling application log.
-
-            Rotation:
-            - when file reaches 10 MB
-            - and once per day
-            - keep up to 10 rolled files
-        -->
-        <RollingFile name="AutomationFile"
+        <!-- Every line from every thread, in the order it happened. -->
+        <RollingFile name="CombinedFile"
                      fileName="${LOG_DIR}/automation.log"
                      filePattern="${LOG_DIR}/archive/automation-%d{yyyy-MM-dd}-%i.log.gz"
-                     append="true"
-                     immediateFlush="true">
+                     append="true">
 
             <PatternLayout pattern="${LOG_PATTERN}"/>
 
             <Policies>
-
-                <!-- Rotate at midnight/day boundary. -->
-                <TimeBasedTriggeringPolicy interval="1"
-                                           modulate="true"/>
-
-                <!-- Rotate if current log grows beyond 10 MB. -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
                 <SizeBasedTriggeringPolicy size="10 MB"/>
-
             </Policies>
 
-            <!-- Keep at most 10 rolled files for the active pattern. -->
             <DefaultRolloverStrategy max="10"/>
-
         </RollingFile>
+
+        <!--
+            One file per test, keyed on the ThreadContext value.
+
+            Worth having because TestNG reuses worker threads: a per-thread file
+            would splice unrelated tests together, whereas this gives each test a
+            clean, linear narrative to read when it fails in a parallel run.
+            Routing on the test name rather than the thread is what makes that
+            true.
+
+            Files are truncated per JVM start, so each file always describes the
+            most recent run of that test.
+        -->
+        <Routing name="PerTestFile">
+            <Routes pattern="$${ctx:testName}">
+
+                <!-- No test in context (suite start/finish): keep it out of the
+                     per-test files rather than inventing a bucket for it. -->
+                <Route key="$${ctx:testName}">
+                    <Null name="OutsideAnyTest"/>
+                </Route>
+
+                <Route>
+                    <File name="Test-${ctx:testName}"
+                          fileName="${LOG_DIR}/tests/${ctx:testName}.log"
+                          append="false">
+                        <PatternLayout pattern="${LOG_PATTERN}"/>
+                    </File>
+                </Route>
+
+            </Routes>
+
+            <!-- Release a test's file handle once it stops being written to. -->
+            <IdlePurgePolicy timeToLive="10" timeUnit="minutes"/>
+        </Routing>
 
     </Appenders>
 
     <Loggers>
-
-        <!--
-            Root logger is shared safely across parallel TestNG threads.
-            Log4j2 serializes writes to the RollingFile appender.
-        -->
         <Root level="INFO">
-
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="AutomationFile"/>
-
+            <AppenderRef ref="CombinedFile"/>
+            <AppenderRef ref="PerTestFile"/>
         </Root>
-
     </Loggers>
 
 </Configuration>

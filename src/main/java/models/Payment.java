@@ -1,6 +1,6 @@
 package models;
 
-import config.ConfigReader;
+import config.TestData;
 
 /**
  * Immutable payment test data for the public Automation Exercise practice form.
@@ -39,10 +39,10 @@ public final class Payment {
     public static final class Builder {
 
         private String nameOnCard = "Automation User";
-        private String cardNumber = ConfigReader.get("payment.card.number");
-        private String cvc = ConfigReader.get("payment.cvc");
-        private String expiryMonth = ConfigReader.get("payment.expiry.month");
-        private String expiryYear = ConfigReader.get("payment.expiry.year");
+        private String cardNumber = TestData.cardNumber();
+        private String cvc = TestData.cvc();
+        private String expiryMonth = TestData.expiryMonth();
+        private String expiryYear = TestData.expiryYear();
 
         public Builder nameOnCard(String value) { nameOnCard = value; return this; }
         public Builder cardNumber(String value) { cardNumber = value; return this; }
