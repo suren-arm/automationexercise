@@ -1,6 +1,7 @@
 package models;
 
 import config.TestData;
+import utils.TestDataGenerator;
 
 /**
  * Immutable payment test data for the public Automation Exercise practice form.
@@ -38,7 +39,8 @@ public final class Payment {
     /** Builder for test-only payment data. */
     public static final class Builder {
 
-        private String nameOnCard = "Automation User";
+        private String nameOnCard = TestDataGenerator.randomName(6)
+                + " " + TestDataGenerator.randomName(8);
         private String cardNumber = TestData.cardNumber();
         private String cvc = TestData.cvc();
         private String expiryMonth = TestData.expiryMonth();

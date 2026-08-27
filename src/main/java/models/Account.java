@@ -1,16 +1,15 @@
 package models;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicInteger;
+import utils.TestDataGenerator;
 
 /**
- * Immutable account test data. Every builder produces a unique email, which is
- * what keeps the registration scenarios repeatable and safe to run in parallel.
+ * Immutable account test data. Every builder produces a fresh identity and a
+ * unique email, which keeps the registration scenarios repeatable and safe to
+ * run in parallel.
  */
 public final class Account {
 
-    private final String title;
+    private final Gender gender;
     private final String name;
     private final String email;
     private final String password;
@@ -32,12 +31,12 @@ public final class Account {
 
     /** Copies all Builder values into the immutable account. */
     private Account(Builder builder) {
-        title = builder.title;
+        gender = builder.gender;
         name = builder.name;
         email = builder.email;
         password = builder.password;
         day = builder.day;
-        month = builder.month;
+        month = builder.month.label();
         year = builder.year;
         newsletter = builder.newsletter;
         offers = builder.offers;
@@ -46,7 +45,7 @@ public final class Account {
         company = builder.company;
         address1 = builder.address1;
         address2 = builder.address2;
-        country = builder.country;
+        country = builder.country.label();
         state = builder.state;
         city = builder.city;
         zipCode = builder.zipCode;
@@ -58,7 +57,7 @@ public final class Account {
         return new Builder();
     }
 
-    public String getTitle() { return title; }
+    public Gender getGender() { return gender; }
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
@@ -84,41 +83,42 @@ public final class Account {
      */
     public static final class Builder {
 
-        private static final DateTimeFormatter TIMESTAMP =
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        private Gender gender = TestDataGenerator.randomEnum(Gender.class);
 
-        /**
-         * Distinguishes accounts created inside the same millisecond, which a
-         * timestamp alone cannot do when tests run in parallel.
-         */
-        private static final AtomicInteger SEQUENCE = new AtomicInteger();
+        /** Left unset so {@link #build()} can keep it in step with the names. */
+        private String name;
 
-        private String title = "Mr";
-        private String name = "Automation User";
-        private String email = uniqueEmail();
-        private String password = "Password123!";
-        private String day = "10";
-        private String month = "May";
-        private String year = "1990";
+        private String email = TestDataGenerator.uniqueEmail();
+        private String password = TestDataGenerator.randomName(6)
+                + TestDataGenerator.randomNumeric(4) + "!";
+
+        // Day is capped at 28 so the date is valid in every month.
+        private String day = String.valueOf(TestDataGenerator.randomInt(1, 28));
+        private Month month = TestDataGenerator.randomEnum(Month.class);
+        private String year = String.valueOf(TestDataGenerator.randomInt(1950, 2005));
+
+        // The scenario requires both subscription boxes ticked.
         private boolean newsletter = true;
         private boolean offers = true;
-        private String firstName = "Automation";
-        private String lastName = "User";
-        private String company = "QA Company";
-        private String address1 = "1 Test Street";
-        private String address2 = "Suite 10";
-        private String country = "Canada";
-        private String state = "Ontario";
-        private String city = "Toronto";
-        private String zipCode = "10001";
-        private String mobileNumber = "1234567890";
 
-        public Builder title(String value) { title = value; return this; }
+        private String firstName = TestDataGenerator.randomName(6);
+        private String lastName = TestDataGenerator.randomName(8);
+        private String company = TestDataGenerator.randomName(8) + " Ltd";
+        private String address1 = TestDataGenerator.randomInt(1, 999)
+                + " " + TestDataGenerator.randomName(7) + " Street";
+        private String address2 = "Suite " + TestDataGenerator.randomInt(1, 99);
+        private Country country = TestDataGenerator.randomEnum(Country.class);
+        private String state = TestDataGenerator.randomName(7);
+        private String city = TestDataGenerator.randomName(7);
+        private String zipCode = TestDataGenerator.randomNumeric(5);
+        private String mobileNumber = TestDataGenerator.randomNumeric(10);
+
+        public Builder gender(Gender value) { gender = value; return this; }
         public Builder name(String value) { name = value; return this; }
         public Builder email(String value) { email = value; return this; }
         public Builder password(String value) { password = value; return this; }
         public Builder day(String value) { day = value; return this; }
-        public Builder month(String value) { month = value; return this; }
+        public Builder month(Month value) { month = value; return this; }
         public Builder year(String value) { year = value; return this; }
         public Builder newsletter(boolean value) { newsletter = value; return this; }
         public Builder offers(boolean value) { offers = value; return this; }
@@ -127,22 +127,22 @@ public final class Account {
         public Builder company(String value) { company = value; return this; }
         public Builder address1(String value) { address1 = value; return this; }
         public Builder address2(String value) { address2 = value; return this; }
-        public Builder country(String value) { country = value; return this; }
+        public Builder country(Country value) { country = value; return this; }
         public Builder state(String value) { state = value; return this; }
         public Builder city(String value) { city = value; return this; }
         public Builder zipCode(String value) { zipCode = value; return this; }
         public Builder mobileNumber(String value) { mobileNumber = value; return this; }
 
-        /** Unique per run, so registration never hits "email already exists". */
-        private static String uniqueEmail() {
-            return "automation."
-                    + LocalDateTime.now().format(TIMESTAMP)
-                    + "." + SEQUENCE.incrementAndGet()
-                    + "@example.com";
-        }
-
-        /** Creates the immutable Account. */
+        /**
+         * Derives the display name from the two name fields unless one was set
+         * explicitly, so {@code name} can never drift from
+         * {@code firstName + " " + lastName}.
+         */
         public Account build() {
+            if (name == null) {
+                name = firstName + " " + lastName;
+            }
+
             return new Account(this);
         }
     }

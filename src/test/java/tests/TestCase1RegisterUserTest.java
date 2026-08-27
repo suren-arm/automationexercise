@@ -27,11 +27,8 @@ public class TestCase1RegisterUserTest extends BaseTest {
     @Story("Register User")
     @Severity(SeverityLevel.CRITICAL)
     public void registerUser() {
-        Account account = Account.builder()
-                .name("TC1 User")
-                .firstName("TC1")
-                .lastName("User")
-                .build();
+        Account account = Account.builder().build();
+        log.debug("Registering {}", account.getEmail());
 
         HomePage home = homePage();
 

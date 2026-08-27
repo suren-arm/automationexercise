@@ -34,15 +34,10 @@ public class TestCase16PlaceOrderLoginBeforeCheckoutTest extends BaseTest {
     @Story("Place Order: Login before Checkout")
     @Severity(SeverityLevel.BLOCKER)
     public void placeOrderAfterLogin() {
-        Account account = Account.builder()
-                .name("TC16 User")
-                .firstName("TC16")
-                .lastName("User")
-                .build();
+        Account account = Account.builder().build();
+        Payment payment = Payment.builder().nameOnCard(account.getName()).build();
 
-        Payment payment = Payment.builder()
-                .nameOnCard(account.getFirstName() + " " + account.getLastName())
-                .build();
+        log.debug("Placing an order as {}", account.getEmail());
 
         HomePage home = homePage();
 

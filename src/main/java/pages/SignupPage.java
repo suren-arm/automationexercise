@@ -1,6 +1,7 @@
 package pages;
 
 import models.Account;
+import models.Gender;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -108,11 +109,7 @@ public class SignupPage extends BasePage {
      * the site ships with.</p>
      */
     public SignupPage fill(Account account) {
-        if ("Mrs".equalsIgnoreCase(account.getTitle())) {
-            actions.click(titleMrs);
-        } else {
-            actions.click(titleMr);
-        }
+        actions.click(account.getGender() == Gender.MRS ? titleMrs : titleMr);
 
         actions.type(password, account.getPassword());
 
