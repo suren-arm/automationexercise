@@ -53,6 +53,24 @@ public final class DriverFactory {
         return driver;
     }
 
+    /**
+     * Sends the ad networks the site embeds to a dead address, so their scripts
+     * never load and cannot cover the page.
+     *
+     * <p>Cheaper and more reliable than dismissing an overlay after it appears,
+     * but it only covers Chromium: Firefox has no equivalent switch, and a new
+     * ad host would not be on this list. {@code InterruptionHandler} therefore
+     * stays as the safety net.</p>
+     */
+    private static final String BLOCK_AD_HOSTS = "--host-resolver-rules="
+            + "MAP *.doubleclick.net 127.0.0.1,"
+            + "MAP *.googlesyndication.com 127.0.0.1,"
+            + "MAP *.googleadservices.com 127.0.0.1,"
+            + "MAP *.googletagservices.com 127.0.0.1,"
+            + "MAP *.adtrafficquality.google 127.0.0.1,"
+            + "MAP adservice.google.com 127.0.0.1,"
+            + "MAP fundingchoicesmessages.google.com 127.0.0.1";
+
     private static WebDriver createChrome(boolean headless) {
         ChromeOptions options = new ChromeOptions();
 
@@ -62,10 +80,11 @@ public final class DriverFactory {
             options.addArguments("--headless=new", "--window-size=1920,1080");
         }
 
-        options.addArguments("--disable-notifications");
+        options.addArguments("--disable-notifications", BLOCK_AD_HOSTS);
         return new ChromeDriver(options);
     }
 
+    /** Firefox has no host-blocking switch, so ads are handled at runtime here. */
     private static WebDriver createFirefox(boolean headless) {
         FirefoxOptions options = new FirefoxOptions();
 
@@ -83,7 +102,7 @@ public final class DriverFactory {
             options.addArguments("--headless=new", "--window-size=1920,1080");
         }
 
-        options.addArguments("--disable-notifications");
+        options.addArguments("--disable-notifications", BLOCK_AD_HOSTS);
         return new EdgeDriver(options);
     }
 
