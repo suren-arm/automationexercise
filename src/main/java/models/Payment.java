@@ -17,36 +17,23 @@ public final class Payment {
 
     /** Creates an immutable Payment from Builder values. */
     private Payment(Builder builder) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        nameOnCard = builder.nameOnCard;
+        cardNumber = builder.cardNumber;
+        cvc = builder.cvc;
+        expiryMonth = builder.expiryMonth;
+        expiryYear = builder.expiryYear;
     }
 
     /** Starts a builder with configured practice payment defaults. */
     public static Builder builder() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return new Builder();
     }
 
-    public String getNameOnCard() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getCardNumber() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getCvc() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getExpiryMonth() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getExpiryYear() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public String getNameOnCard() { return nameOnCard; }
+    public String getCardNumber() { return cardNumber; }
+    public String getCvc() { return cvc; }
+    public String getExpiryMonth() { return expiryMonth; }
+    public String getExpiryYear() { return expiryYear; }
 
     /** Builder for test-only payment data. */
     public static final class Builder {
@@ -57,31 +44,15 @@ public final class Payment {
         private String expiryMonth = ConfigReader.get("payment.expiry.month");
         private String expiryYear = ConfigReader.get("payment.expiry.year");
 
-        public Builder nameOnCard(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder cardNumber(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder cvc(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder expiryMonth(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder expiryYear(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
+        public Builder nameOnCard(String value) { nameOnCard = value; return this; }
+        public Builder cardNumber(String value) { cardNumber = value; return this; }
+        public Builder cvc(String value) { cvc = value; return this; }
+        public Builder expiryMonth(String value) { expiryMonth = value; return this; }
+        public Builder expiryYear(String value) { expiryYear = value; return this; }
 
         /** Creates immutable Payment data. */
         public Payment build() {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
+            return new Payment(this);
         }
     }
 }

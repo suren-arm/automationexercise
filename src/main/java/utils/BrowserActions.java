@@ -11,24 +11,9 @@ public class BrowserActions {
     private final WebDriver driver;
     private final WaitUtils wait;
 
-    public BrowserActions(WebDriver driver) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public void open(String url) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String currentUrl() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public void refresh() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public void removeUrlFragment() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public BrowserActions(WebDriver driver) { this.driver=driver; this.wait=new WaitUtils(driver); }
+    public void open(String url) { LOG.info("Opening URL: {}", url); driver.get(url); wait.pageLoaded(driver); }
+    public String currentUrl() { return driver.getCurrentUrl(); }
+    public void refresh() { driver.navigate().refresh(); wait.pageLoaded(driver); }
+    public void removeUrlFragment() { ((JavascriptExecutor)driver).executeScript("history.replaceState(null, document.title, window.location.pathname + window.location.search);"); }
 }

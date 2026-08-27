@@ -28,8 +28,10 @@ public class UiActions {
 
     /** Creates the reusable UI action wrapper. */
     public UiActions(WebDriver driver) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        this.driver = driver;
+        this.wait = new WaitUtils(driver);
+        this.seleniumActions = new Actions(driver);
+        this.vignette = new GoogleVignetteHandler(driver);
     }
 
     /**
@@ -39,97 +41,182 @@ public class UiActions {
      * exception triggers forced recovery and one retry.</p>
      */
     public void click(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.info("Clicking element");
+
+        dismissInterruptions();
+
+        try {
+            wait.clickable(element)
+                    .click();
+
+        } catch (ElementClickInterceptedException exception) {
+            LOG.warn(
+                    "Click intercepted. Recovering from Google vignette."
+            );
+
+            vignette.forceCloseBlockingAd();
+
+            wait.clickable(element)
+                    .click();
+        }
     }
 
     /** Safe click using a locator. */
     public void click(By locator) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.info("Clicking {}", locator);
+
+        dismissInterruptions();
+
+        try {
+            wait.clickable(locator)
+                    .click();
+
+        } catch (ElementClickInterceptedException exception) {
+            LOG.warn(
+                    "Locator click intercepted. Recovering from Google vignette."
+            );
+
+            vignette.forceCloseBlockingAd();
+
+            wait.clickable(locator)
+                    .click();
+        }
     }
 
     /** Waits and clears input. */
     public void clear(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+        wait.visible(element)
+                .clear();
     }
 
     /** Waits, clears and types. */
     public void type(
             WebElement element,
             String value) {
-                // TODO: implement.
-                throw new UnsupportedOperationException("TODO");
-            }
+
+        LOG.info("Typing into input");
+
+        dismissInterruptions();
+
+        WebElement target =
+                wait.visible(element);
+
+        target.clear();
+        target.sendKeys(value);
+    }
 
     /** Appends text without clearing. */
     public void append(
             WebElement element,
             String value) {
-                // TODO: implement.
-                throw new UnsupportedOperationException("TODO");
-            }
+
+        dismissInterruptions();
+
+        wait.visible(element)
+                .sendKeys(value);
+    }
 
     /** Returns visible element text. */
     public String getText(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        return wait.visible(element)
+                .getText();
     }
 
     /** Returns whether an element becomes visible. */
     public boolean isDisplayed(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        try {
+            return wait.visible(element)
+                    .isDisplayed();
+
+        } catch (TimeoutException
+                 | NoSuchElementException exception) {
+
+            return false;
+        }
     }
 
     /** Returns selection state. */
     public boolean isSelected(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        return wait.visible(element)
+                .isSelected();
     }
 
     /** Selects dropdown option by visible text. */
     public void selectByVisibleText(
             WebElement element,
             String visibleText) {
-                // TODO: implement.
-                throw new UnsupportedOperationException("TODO");
-            }
+
+        dismissInterruptions();
+
+        new Select(
+                wait.visible(element))
+                .selectByVisibleText(visibleText);
+    }
 
     /** Hovers over an element. */
     public void hover(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        seleniumActions
+                .moveToElement(
+                        wait.visible(element))
+                .perform();
     }
 
     /** Scrolls an element into viewport. */
     public void scrollIntoView(WebElement element) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        WebElement target =
+                wait.visible(element);
+
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "arguments[0].scrollIntoView({block:'center'});",
+                        target
+                );
     }
 
     /** Scrolls to bottom. */
     public void scrollToBottom() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        ((JavascriptExecutor) driver)
+                .executeScript(
+                        "window.scrollTo("
+                                + "0,"
+                                + "document.body.scrollHeight"
+                                + ");"
+                );
     }
 
     /** Returns current number of matching elements. */
     public int count(By locator) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        return driver.findElements(locator)
+                .size();
     }
 
     /** Returns text from all matching elements. */
     public List<String> getTexts(By locator) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        dismissInterruptions();
+
+        return driver.findElements(locator)
+                .stream()
+                .map(WebElement::getText)
+                .toList();
     }
 
     /** Central transient-interruption hook. */
     private void dismissInterruptions() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        vignette.closeIfPresent();
     }
 }

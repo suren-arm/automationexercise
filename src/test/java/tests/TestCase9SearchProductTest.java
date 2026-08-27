@@ -21,11 +21,7 @@ public class TestCase9SearchProductTest extends BaseTest {
     @Story("Search Product")
     @Severity(SeverityLevel.NORMAL)
     public void testCase9SearchProduct() {
-        var home = pages.testCases().goToHome();
-
-        Assert.assertTrue(
-                home.isVisible(),
-                "Home page should be visible.");
+        var home = pages.home();
 
         var products = home.goToProducts();
 

@@ -13,19 +13,16 @@ public final class ScreenshotUtils {
 
     /** Utility class. */
     private ScreenshotUtils() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
     }
 
     /** Captures current browser as PNG bytes. */
     public static byte[] capture() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return ((TakesScreenshot) DriverFactory.getDriver())
+                .getScreenshotAs(OutputType.BYTES);
     }
 
     /** Converts screenshot bytes into an Allure-compatible stream. */
     public static ByteArrayInputStream stream() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return new ByteArrayInputStream(capture());
     }
 }

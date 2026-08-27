@@ -24,19 +24,45 @@ public abstract class BaseTest {
     protected PageManager pages;
 
     /**
-     * Opens the assignment base_url before every test:
-     * https://automationexercise.com/test_cases
+     * Opens the Home page before every test from the configured root base_url.
      */
     @BeforeMethod(alwaysRun = true)
     public void setUp(Method method) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        /*
+         * ThreadContext is thread-local.
+         * Each parallel TestNG worker therefore gets its own current test name,
+         * even though every thread writes safely to the same log file.
+         */
+        ThreadContext.put(
+                "testName",
+                method.getName()
+        );
+        DriverFactory.createDriver();
+        pages = new PageManager();
+
+        log.info("Opening Home page from base_url: {}", ConfigReader.baseUrl());
+
+        pages.home().open(ConfigReader.baseUrl());
+
+        Assert.assertTrue(
+                pages.home().isVisible(),
+                "Home page should be visible.");
     }
 
     /** Always closes the browser after each test. */
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        try {
+            DriverFactory.quitDriver();
+        } finally {
+
+            /*
+             * Always clear thread-local logging context because TestNG can
+             * reuse worker threads for later test methods.
+             */
+            ThreadContext.clearAll();
+        }
     }
 }

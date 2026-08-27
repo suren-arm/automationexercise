@@ -7,18 +7,13 @@ package pages;
  */
 public class PageManager {
 
-    private TestCasesPage testCasesPage;
     private HomePage homePage;
-
-    /** Returns TestCasesPage. */
-    public TestCasesPage testCases() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
 
     /** Returns HomePage. */
     public HomePage home() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        if (homePage == null) {
+            homePage = new HomePage();
+        }
+        return homePage;
     }
 }

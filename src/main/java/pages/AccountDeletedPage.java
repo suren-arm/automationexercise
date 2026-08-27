@@ -16,8 +16,7 @@ public class AccountDeletedPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public AccountDeletedPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -31,13 +30,14 @@ public class AccountDeletedPage extends BasePage {
 
     /** Returns confirmation text. */
     public String getConfirmation() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.getText(confirmation);
     }
 
     /** Continues back to Home. */
     public HomePage continueToHome() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(continueButton);
+        return new HomePage();
     }
 }

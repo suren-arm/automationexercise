@@ -30,55 +30,111 @@ public class MavenConsoleTestListener
 
     @Override
     public void onStart(ISuite suite) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        PASSED.set(0);
+        FAILED.set(0);
+        SKIPPED.set(0);
+
+        suiteName = suite.getName();
+
+        System.out.println();
+        System.out.println("============================================================");
+        System.out.println("[TESTNG TREE]");
+        System.out.println(suiteName);
+        System.out.println("└── " + PROJECT_NAME);
+        System.out.println("============================================================");
     }
 
     @Override
     public void onBeforeClass(ITestClass testClass) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String className = testClass.getRealClass().getSimpleName();
+
+        System.out.println();
+        System.out.println("    └── " + className);
     }
 
     @Override
     public void onAfterClass(ITestClass testClass) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String className = testClass.getRealClass().getSimpleName();
+
+        System.out.println("        [CLASS FINISHED] " + className);
     }
 
     @Override
     public void onTestStart(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        System.out.println(
+                "        └── "
+                        + result.getMethod().getMethodName()
+                        + "  [RUNNING] [thread=" + threadName() + "]"
+        );
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        PASSED.incrementAndGet();
+
+        System.out.println(
+                "            ✓ PASSED  "
+                        + displayName(result)
+                        + " [thread=" + threadName() + "]"
+        );
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        FAILED.incrementAndGet();
+
+        System.out.println(
+                "            ✗ FAILED  "
+                        + displayName(result)
+                        + " [thread=" + threadName() + "]"
+        );
+
+        if (result.getThrowable() != null) {
+            System.out.println(
+                    "              Reason: "
+                            + result.getThrowable().getClass().getSimpleName()
+                            + " - "
+                            + safeMessage(result.getThrowable().getMessage())
+            );
+        }
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        SKIPPED.incrementAndGet();
+
+        System.out.println(
+                "            ! SKIPPED "
+                        + displayName(result)
+                        + " [thread=" + threadName() + "]"
+        );
     }
 
     @Override
     public void onFinish(ISuite suite) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        int passed = PASSED.get();
+        int failed = FAILED.get();
+        int skipped = SKIPPED.get();
+        int total = passed + failed + skipped;
+
+        System.out.println();
+        System.out.println("============================================================");
+        System.out.println("[TESTNG SUMMARY]");
+        System.out.println("Suite   : " + suiteName);
+        System.out.println("Project : " + PROJECT_NAME);
+        System.out.println("Total   : " + total);
+        System.out.println("Passed  : " + passed);
+        System.out.println("Failed  : " + failed);
+        System.out.println("Skipped : " + skipped);
+        System.out.println("Status  : " + (failed == 0 ? "SUCCESS" : "FAILED"));
+        System.out.println("============================================================");
+        System.out.println();
     }
 
     private String displayName(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return result.getTestClass().getRealClass().getSimpleName()
+                + "."
+                + result.getMethod().getMethodName();
     }
 
 
@@ -86,12 +142,15 @@ public class MavenConsoleTestListener
      * Returns the current TestNG worker thread name.
      */
     private String threadName() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return Thread.currentThread()
+                     .getName();
     }
 
     private String safeMessage(String message) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        if (message == null || message.isBlank()) {
+            return "No failure message";
+        }
+
+        return message.replace('\n', ' ').replace('\r', ' ');
     }
 }

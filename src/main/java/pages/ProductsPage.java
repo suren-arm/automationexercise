@@ -19,8 +19,7 @@ public class ProductsPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public ProductsPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -46,25 +45,27 @@ public class ProductsPage extends BasePage {
 
     /** Returns whether All Products page is visible. */
     public boolean isVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(allProducts);
     }
 
     /** Searches for a product. */
     public ProductsPage search(String productName) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.type(searchInput, productName);
+        actions.click(searchButton);
+        return this;
     }
 
     /** Returns whether Searched Products heading is visible. */
     public boolean isSearchResultVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(searchedProducts);
     }
 
     /** Returns all visible result product names. */
     public List<String> getResultNames() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.getTexts(resultNames);
     }
 }

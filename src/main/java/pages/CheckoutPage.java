@@ -19,8 +19,7 @@ public class CheckoutPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public CheckoutPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -42,25 +41,27 @@ public class CheckoutPage extends BasePage {
 
     /** Returns whether Address Details is visible. */
     public boolean isAddressDetailsVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(addressDetails);
     }
 
     /** Returns whether Review Your Order is visible. */
     public boolean isReviewOrderVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(reviewOrder);
     }
 
     /** Enters order comment. */
     public CheckoutPage enterComment(String text) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.type(comment, text);
+        return this;
     }
 
     /** Opens payment form. */
     public PaymentPage placeOrder() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(placeOrder);
+        return new PaymentPage();
     }
 }

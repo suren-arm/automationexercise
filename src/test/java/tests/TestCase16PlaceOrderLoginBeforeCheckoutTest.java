@@ -42,8 +42,7 @@ public class TestCase16PlaceOrderLoginBeforeCheckoutTest extends BaseTest {
          * PRECONDITION:
          * Create a unique account because official TC16 assumes an existing user.
          */
-        var home = pages.testCases()
-                .goToHome();
+        var home = pages.home();
 
         var created = home
                 .goToSignupLogin()

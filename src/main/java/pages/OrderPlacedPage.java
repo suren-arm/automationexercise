@@ -16,8 +16,7 @@ public class OrderPlacedPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public OrderPlacedPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -32,7 +31,7 @@ public class OrderPlacedPage extends BasePage {
 
     /** Returns whether an order success message is visible. */
     public boolean isOrderPlacedSuccessfully() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(wait.visible(successMessage));
     }
 }

@@ -20,8 +20,7 @@ public class LoginPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public LoginPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -59,37 +58,43 @@ public class LoginPage extends BasePage {
 
     /** Returns whether signup section is visible. */
     public boolean isSignupVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(signupHeading);
     }
 
     /** Returns whether login section is visible. */
     public boolean isLoginVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(loginHeading);
     }
 
     /** Enters name/email for signup from Account. */
     public LoginPage enterSignup(Account account) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.type(signupName, account.getName());
+        actions.type(signupEmail, account.getEmail());
+        return this;
     }
 
     /** Continues signup to the full account form. */
     public SignupPage clickSignup() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(signupButton);
+        return new SignupPage();
     }
 
     /** Enters existing account login credentials. */
     public LoginPage enterLogin(Account account) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.type(loginEmail, account.getEmail());
+        actions.type(loginPassword, account.getPassword());
+        return this;
     }
 
     /** Submits login. */
     public HomePage clickLogin() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(loginButton);
+        return new HomePage();
     }
 }

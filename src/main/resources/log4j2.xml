@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Thread-safe Log4j2 configuration.
+
+    Logs are written to:
+        logs/automation.log
+
+    Rolled logs are stored under:
+        logs/archive/
+
+    Log4j2 appenders are designed for concurrent use, so multiple TestNG
+    worker threads can safely write to the same rolling log file.
+
+    Pattern fields:
+        [%t]              -> Java/TestNG worker thread name
+        [%X{testName}]    -> current TestNG test method from ThreadContext
+-->
+<Configuration status="WARN">
+
+    <Properties>
+        <!--
+            Keep the log location outside target/ so `mvn clean` does not
+            delete previous local execution logs.
+        -->
+        <Property name="LOG_DIR">logs</Property>
+
+        <!--
+            Thread + test name make parallel execution easy to diagnose.
+            When no test context is active, testName is displayed as "-".
+        -->
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] [test=%X{testName:-}] %c{1} - %msg%n
+        </Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Human-readable console output. -->
+        <Console name="Console"
+                 target="SYSTEM_OUT">
+
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+
+        </Console>
+
+        <!--
+            Thread-safe rolling application log.
+
+            Rotation:
+            - when file reaches 10 MB
+            - and once per day
+            - keep up to 10 rolled files
+        -->
+        <RollingFile name="AutomationFile"
+                     fileName="${LOG_DIR}/automation.log"
+                     filePattern="${LOG_DIR}/archive/automation-%d{yyyy-MM-dd}-%i.log.gz"
+                     append="true"
+                     immediateFlush="true">
+
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+
+            <Policies>
+
+                <!-- Rotate at midnight/day boundary. -->
+                <TimeBasedTriggeringPolicy interval="1"
+                                           modulate="true"/>
+
+                <!-- Rotate if current log grows beyond 10 MB. -->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+
+            </Policies>
+
+            <!-- Keep at most 10 rolled files for the active pattern. -->
+            <DefaultRolloverStrategy max="10"/>
+
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!--
+            Root logger is shared safely across parallel TestNG threads.
+            Log4j2 serializes writes to the RollingFile appender.
+        -->
+        <Root level="INFO">
+
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AutomationFile"/>
+
+        </Root>
+
+    </Loggers>
+
+</Configuration>

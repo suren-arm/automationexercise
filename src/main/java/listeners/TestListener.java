@@ -18,21 +18,28 @@ public class TestListener implements ITestListener {
     /** Logs passed tests. */
     @Override
     public void onTestSuccess(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.info("PASSED: {}", result.getMethod().getQualifiedName());
     }
 
     /** Logs skipped tests. */
     @Override
     public void onTestSkipped(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.warn("SKIPPED: {}", result.getMethod().getQualifiedName());
     }
 
     /** Logs failure and attaches screenshot to Allure. */
     @Override
     public void onTestFailure(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.error("FAILED: {}", result.getMethod().getQualifiedName(), result.getThrowable());
+
+        try {
+            Allure.addAttachment(
+                    "Failure Screenshot",
+                    "image/png",
+                    ScreenshotUtils.stream(),
+                    ".png");
+        } catch (Exception e) {
+            LOG.error("Could not capture failure screenshot.", e);
+        }
     }
 }

@@ -27,8 +27,6 @@ public final class DriverFactory {
 
     /** Static utility class. */
     private DriverFactory() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
     }
 
     /**
@@ -37,26 +35,62 @@ public final class DriverFactory {
      * @return current thread's WebDriver
      */
     public static WebDriver createDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String browser = ConfigReader.browser().trim().toLowerCase();
+        boolean headless = ConfigReader.headless();
+
+        WebDriver webDriver = switch (browser) {
+            case "chrome" -> createChrome(headless);
+            case "firefox", "gecko" -> createFirefox(headless);
+            case "edge" -> createEdge(headless);
+            default -> throw new IllegalArgumentException(
+                    "Unsupported browser: " + browser
+                            + ". Supported values: chrome, firefox/gecko, edge.");
+        };
+
+        DRIVER.set(webDriver);
+        webDriver.manage().deleteAllCookies();
+
+        if (!headless) {
+            webDriver.manage().window().maximize();
+        }
+
+        LOG.info("Created {} driver. Thread={}", browser, Thread.currentThread().getName());
+        return webDriver;
     }
 
     /** Creates ChromeDriver with framework options. */
     private static WebDriver createChrome(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        ChromeOptions options = new ChromeOptions();
+
+        if (headless) {
+            options.addArguments("--headless=new");
+        }
+
+        options.addArguments("--disable-notifications");
+        return new ChromeDriver(options);
     }
 
     /** Creates FirefoxDriver/GeckoDriver with framework options. */
     private static WebDriver createFirefox(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        FirefoxOptions options = new FirefoxOptions();
+
+        if (headless) {
+            options.addArguments("-headless");
+        }
+
+        return new FirefoxDriver(options);
     }
 
     /** Creates EdgeDriver with framework options. */
     private static WebDriver createEdge(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        EdgeOptions options = new EdgeOptions();
+
+        if (headless) {
+            options.addArguments("--headless=new");
+        }
+
+        options.addArguments("--disable-notifications");
+        return new EdgeDriver(options);
     }
 
     /**
@@ -65,8 +99,14 @@ public final class DriverFactory {
      * @return current WebDriver
      */
     public static WebDriver getDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        WebDriver webDriver = DRIVER.get();
+
+        if (webDriver == null) {
+            throw new IllegalStateException(
+                    "WebDriver has not been initialized for the current thread.");
+        }
+
+        return webDriver;
     }
 
     /**
@@ -76,7 +116,15 @@ public final class DriverFactory {
      * threads are reused.</p>
      */
     public static void quitDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        WebDriver webDriver = DRIVER.get();
+
+        try {
+            if (webDriver != null) {
+                webDriver.quit();
+                LOG.info("Driver closed. Thread={}", Thread.currentThread().getName());
+            }
+        } finally {
+            DRIVER.remove();
+        }
     }
 }

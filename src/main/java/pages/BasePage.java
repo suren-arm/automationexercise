@@ -28,7 +28,6 @@ public abstract class BasePage {
     @FindBy(css="a[href='/products']") private WebElement productsMenu;
     @FindBy(css="a[href='/view_cart']") private WebElement cartMenu;
     @FindBy(css="a[href='/login']") private WebElement signupLoginMenu;
-    @FindBy(css="a[href='/test_cases']") private WebElement testCasesMenu;
     @FindBy(css="a[href='/api_list']") private WebElement apiTestingMenu;
     @FindBy(css="a[href='https://www.youtube.com/c/AutomationExercise']") private WebElement videoTutorialsMenu;
     @FindBy(css="a[href='/contact_us']") private WebElement contactUsMenu;
@@ -37,51 +36,48 @@ public abstract class BasePage {
     @FindBy(xpath="//a[contains(.,'Logged in as')]") private WebElement loggedInAsMenu;
 
     protected BasePage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        /*
+         * 1. Get the WebDriver that belongs to the current TestNG thread.
+         */
+        this.driver = DriverFactory.getDriver();
+
+        /*
+         * 2. Create the explicit-wait helper.
+         */
+        this.wait = new WaitUtils(driver);
+
+        /*
+         * 3. Check Google vignette immediately when a new page object is built.
+         *    This handles an ad that is already visible after navigation.
+         */
+        this.vignette = new GoogleVignetteHandler(driver);
+        this.vignette.closeIfPresent();
+
+        /*
+         * 4. Create reusable action wrappers.
+         *    UiActions also checks the vignette immediately before each action,
+         *    because an ad may appear later between two UI operations.
+         */
+        this.actions = new UiActions(driver);
+        this.browser = new BrowserActions(driver);
+
+        /*
+         * 5. Initialize @FindBy elements declared by the concrete child page.
+         *    Even though this is in BasePage, "this" is the real child object.
+         */
+        PageFactory.initElements(driver, this);
     }
 
     /** Dismisses intermittent Google vignette before important interactions. */
     
 
-    public HomePage goToHome() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public ProductsPage goToProducts() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public CartPage goToCart() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public LoginPage goToSignupLogin() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public TestCasesPage goToTestCases() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public boolean isLoggedIn() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getLoggedInText() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public LoginPage logout() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public AccountDeletedPage deleteAccount() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public boolean isLogoDisplayed() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public HomePage goToHome() { actions.click(homeMenu); return new HomePage(); }
+    public ProductsPage goToProducts() { actions.click(productsMenu); return new ProductsPage(); }
+    public CartPage goToCart() { actions.click(cartMenu); return new CartPage(); }
+    public LoginPage goToSignupLogin() { actions.click(signupLoginMenu); return new LoginPage(); }
+    public boolean isLoggedIn() { return actions.isDisplayed(loggedInAsMenu); }
+    public String getLoggedInText() { return actions.getText(loggedInAsMenu); }
+    public LoginPage logout() { actions.click(logoutMenu); return new LoginPage(); }
+    public AccountDeletedPage deleteAccount() { actions.click(deleteAccountMenu); return new AccountDeletedPage(); }
+    public boolean isLogoDisplayed() { return actions.isDisplayed(logo); }
 }

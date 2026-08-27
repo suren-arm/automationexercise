@@ -32,92 +32,51 @@ public final class Account {
 
     /** Copies all Builder values into the immutable account. */
     private Account(Builder builder) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        title = builder.title;
+        name = builder.name;
+        email = builder.email;
+        password = builder.password;
+        day = builder.day;
+        month = builder.month;
+        year = builder.year;
+        newsletter = builder.newsletter;
+        offers = builder.offers;
+        firstName = builder.firstName;
+        lastName = builder.lastName;
+        company = builder.company;
+        address1 = builder.address1;
+        address2 = builder.address2;
+        country = builder.country;
+        state = builder.state;
+        city = builder.city;
+        zipCode = builder.zipCode;
+        mobileNumber = builder.mobileNumber;
     }
 
     /** Starts a Builder populated with valid Automation Exercise data. */
     public static Builder builder() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return new Builder();
     }
 
-    public String getTitle() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getName() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getEmail() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getPassword() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getDay() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getMonth() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getYear() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public boolean isNewsletter() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public boolean isOffers() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getFirstName() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getLastName() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getCompany() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getAddress1() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getAddress2() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getCountry() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getState() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getCity() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getZipCode() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getMobileNumber() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public String getTitle() { return title; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public String getPassword() { return password; }
+    public String getDay() { return day; }
+    public String getMonth() { return month; }
+    public String getYear() { return year; }
+    public boolean isNewsletter() { return newsletter; }
+    public boolean isOffers() { return offers; }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getCompany() { return company; }
+    public String getAddress1() { return address1; }
+    public String getAddress2() { return address2; }
+    public String getCountry() { return country; }
+    public String getState() { return state; }
+    public String getCity() { return city; }
+    public String getZipCode() { return zipCode; }
+    public String getMobileNumber() { return mobileNumber; }
 
     /**
      * Builder with valid defaults.
@@ -147,87 +106,29 @@ public final class Account {
         private String zipCode = "10001";
         private String mobileNumber = "1234567890";
 
-        public Builder title(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder name(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder email(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder password(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder day(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder month(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder year(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder newsletter(boolean value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder offers(boolean value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder firstName(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder lastName(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder company(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder address1(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder address2(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder country(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder state(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder city(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder zipCode(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
-        public Builder mobileNumber(String value) {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
-        }
+        public Builder title(String value) { title = value; return this; }
+        public Builder name(String value) { name = value; return this; }
+        public Builder email(String value) { email = value; return this; }
+        public Builder password(String value) { password = value; return this; }
+        public Builder day(String value) { day = value; return this; }
+        public Builder month(String value) { month = value; return this; }
+        public Builder year(String value) { year = value; return this; }
+        public Builder newsletter(boolean value) { newsletter = value; return this; }
+        public Builder offers(boolean value) { offers = value; return this; }
+        public Builder firstName(String value) { firstName = value; return this; }
+        public Builder lastName(String value) { lastName = value; return this; }
+        public Builder company(String value) { company = value; return this; }
+        public Builder address1(String value) { address1 = value; return this; }
+        public Builder address2(String value) { address2 = value; return this; }
+        public Builder country(String value) { country = value; return this; }
+        public Builder state(String value) { state = value; return this; }
+        public Builder city(String value) { city = value; return this; }
+        public Builder zipCode(String value) { zipCode = value; return this; }
+        public Builder mobileNumber(String value) { mobileNumber = value; return this; }
 
         /** Creates the immutable Account. */
         public Account build() {
-            // TODO: implement.
-            throw new UnsupportedOperationException("TODO");
+            return new Account(this);
         }
     }
 }

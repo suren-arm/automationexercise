@@ -35,8 +35,86 @@ public class TestNgSuiteListener
      */
     @Override
     public void onStart(ISuite suite) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        int threadCount =
+                ConfigReader.getThreadCount();
+
+        XmlSuite xmlSuite =
+                suite.getXmlSuite();
+
+        xmlSuite.setThreadCount(
+                threadCount
+        );
+
+        String environment =
+                ConfigReader.environment()
+                            .toUpperCase();
+
+        String browser =
+                ConfigReader.browser()
+                            .toUpperCase();
+
+        String executionMode =
+                ConfigReader.getExecutionMode()
+                            .toUpperCase();
+
+        String baseUrl =
+                ConfigReader.baseUrl();
+
+        LOG.info(
+                "============================================================"
+        );
+
+        LOG.info(
+                "AUTOMATIONEXERCISE FRAMEWORK STARTED"
+        );
+
+        LOG.info(
+                "Suite          : {}",
+                suite.getName()
+        );
+
+        LOG.info(
+                "Environment    : {}",
+                environment
+        );
+
+        LOG.info(
+                "Browser        : {}",
+                browser
+        );
+
+        LOG.info(
+                "Execution Mode : {}",
+                executionMode
+        );
+
+        LOG.info(
+                "Thread Count   : {}",
+                threadCount
+        );
+
+        LOG.info(
+                "Base URL       : {}",
+                baseUrl
+        );
+
+        LOG.info(
+                "============================================================"
+        );
+
+        /*
+         * Also print a compact human-readable line directly to stdout.
+         * This makes the most important startup information easy to spot
+         * inside Maven and Jenkins consoles.
+         */
+        System.out.printf(
+                "%n[FRAMEWORK] STARTED | ENV=%s | BROWSER=%s | MODE=%s | THREADS=%d%n%n",
+                environment,
+                browser,
+                executionMode,
+                threadCount
+        );
     }
 
     /**
@@ -49,7 +127,90 @@ public class TestNgSuiteListener
      */
     @Override
     public void onFinish(ISuite suite) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        int passed = 0;
+        int failed = 0;
+        int skipped = 0;
+
+        for (ISuiteResult suiteResult
+                : suite.getResults()
+                       .values()) {
+
+            passed +=
+                    suiteResult.getTestContext()
+                               .getPassedTests()
+                               .size();
+
+            failed +=
+                    suiteResult.getTestContext()
+                               .getFailedTests()
+                               .size();
+
+            skipped +=
+                    suiteResult.getTestContext()
+                               .getSkippedTests()
+                               .size();
+        }
+
+        int total =
+                passed
+                        + failed
+                        + skipped;
+
+        String finalStatus =
+                failed == 0
+                        ? "SUCCESS"
+                        : "FAILED";
+
+        LOG.info(
+                "============================================================"
+        );
+
+        LOG.info(
+                "AUTOMATIONEXERCISE FRAMEWORK FINISHED"
+        );
+
+        LOG.info(
+                "Suite   : {}",
+                suite.getName()
+        );
+
+        LOG.info(
+                "Status  : {}",
+                finalStatus
+        );
+
+        LOG.info(
+                "Total   : {}",
+                total
+        );
+
+        LOG.info(
+                "Passed  : {}",
+                passed
+        );
+
+        LOG.info(
+                "Failed  : {}",
+                failed
+        );
+
+        LOG.info(
+                "Skipped : {}",
+                skipped
+        );
+
+        LOG.info(
+                "============================================================"
+        );
+
+        System.out.printf(
+                "%n[FRAMEWORK] FINISHED | STATUS=%s | TOTAL=%d | PASSED=%d | FAILED=%d | SKIPPED=%d%n%n",
+                finalStatus,
+                total,
+                passed,
+                failed,
+                skipped
+        );
     }
 }

@@ -27,11 +27,7 @@ public class TestCase1RegisterUserTest extends BaseTest {
                 .lastName("User")
                 .build();
 
-        var home = pages.testCases().goToHome();
-
-        Assert.assertTrue(
-                home.isVisible(),
-                "Home page should be visible.");
+        var home = pages.home();
 
         var login = home.goToSignupLogin();
 

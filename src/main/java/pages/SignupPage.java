@@ -17,8 +17,7 @@ public class SignupPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public SignupPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -85,19 +84,51 @@ public class SignupPage extends BasePage {
 
     /** Returns whether account-information form is visible. */
     public boolean isVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(heading);
     }
 
     /** Fills the complete account form from an Account Builder object. */
     public SignupPage fill(Account account) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        if ("Mrs".equalsIgnoreCase(account.getTitle())) {
+            actions.click(mrs);
+        } else {
+            actions.click(mr);
+        }
+
+        actions.type(password, account.getPassword());
+
+        actions.selectByVisibleText(days, account.getDay());
+        actions.selectByVisibleText(months, account.getMonth());
+        actions.selectByVisibleText(years, account.getYear());
+
+        if (account.isNewsletter() && !actions.isSelected(newsletter)) {
+            actions.click(newsletter);
+        }
+
+        if (account.isOffers() && !actions.isSelected(offers)) {
+            actions.click(offers);
+        }
+
+        actions.type(firstName, account.getFirstName());
+        actions.type(lastName, account.getLastName());
+        actions.type(company, account.getCompany());
+        actions.type(address1, account.getAddress1());
+        actions.type(address2, account.getAddress2());
+        actions.selectByVisibleText(country, account.getCountry());
+        actions.type(state, account.getState());
+        actions.type(city, account.getCity());
+        actions.type(zipCode, account.getZipCode());
+        actions.type(mobile, account.getMobileNumber());
+
+        return this;
     }
 
     /** Submits registration. */
     public AccountCreatedPage createAccount() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(createAccount);
+        return new AccountCreatedPage();
     }
 }

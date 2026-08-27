@@ -15,8 +15,7 @@ public class HomePage extends BasePage {
      * elements through PageFactory.</p>
      */
     public HomePage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
     @FindBy(xpath="//h2[contains(normalize-space(),'Full-Fledged practice website for Automation Engineers')]") private WebElement heroText;
@@ -25,28 +24,11 @@ public class HomePage extends BasePage {
     private final By firstProductAddToCart=By.cssSelector(".features_items .product-image-wrapper a.add-to-cart");
     @FindBy(css="button[data-dismiss='modal']") private WebElement continueShopping;
 
-    public boolean isVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public HomePage addFirstProductToCart() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public HomePage scrollToBottom() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public boolean isSubscriptionVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public HomePage clickScrollUpArrow() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-    public String getHeroText() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public HomePage open(String baseUrl) { browser.open(baseUrl); return this; }
+    public boolean isVisible() { return actions.isDisplayed(heroText); }
+    public HomePage addFirstProductToCart() { WebElement e=wait.visible(firstProductAddToCart); actions.scrollIntoView(e); actions.click(e); actions.click(continueShopping); return this; }
+    public HomePage scrollToBottom() { actions.scrollToBottom(); return this; }
+    public boolean isSubscriptionVisible() { return actions.isDisplayed(subscription); }
+    public HomePage clickScrollUpArrow() { actions.click(scrollUpArrow); return this; }
+    public String getHeroText() { return actions.getText(heroText); }
 }

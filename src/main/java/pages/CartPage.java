@@ -16,8 +16,7 @@ public class CartPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public CartPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -31,13 +30,14 @@ public class CartPage extends BasePage {
 
     /** Returns whether cart page is displayed. */
     public boolean isVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.isDisplayed(heading);
     }
 
     /** Proceeds from Cart to Checkout. */
     public CheckoutPage proceedToCheckout() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(proceedToCheckout);
+        return new CheckoutPage();
     }
 }

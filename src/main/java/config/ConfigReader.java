@@ -18,13 +18,21 @@ public final class ConfigReader {
 
     /** Loads config.properties once when the class is initialized. */
     static {
-        // TODO: initialize static framework state.
+        try (InputStream input = ConfigReader.class.getClassLoader()
+                .getResourceAsStream("config.properties")) {
+
+            if (input == null) {
+                throw new IllegalStateException("config.properties was not found.");
+            }
+
+            PROPERTIES.load(input);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load config.properties.", e);
+        }
     }
 
     /** Utility class; object creation is not required. */
     private ConfigReader() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
     }
 
     /**
@@ -34,55 +42,75 @@ public final class ConfigReader {
      * @return JVM system value when supplied, otherwise file value
      */
     public static String get(String key) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String systemValue = System.getProperty(key);
+
+        if (systemValue != null && !systemValue.isBlank()) {
+            return systemValue;
+        }
+
+        return PROPERTIES.getProperty(key);
     }
 
     /** Returns selected browser. */
     public static String browser() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return get("browser");
     }
 
     /** Returns configured explicit-wait timeout in seconds. */
     public static int timeout() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return Integer.parseInt(get("timeout"));
     }
 
     /** Returns whether browser should run headlessly. */
     public static boolean headless() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return Boolean.parseBoolean(get("headless"));
     }
 
     /** Returns selected environment name. */
     public static String environment() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return get("environment");
     }
 
     /**
      * Returns assignment base URL.
      *
      * <p>The user explicitly requested
-     * https://automationexercise.com/test_cases as base_url.</p>
+     * https://automationexercise.com as the root base_url.</p>
      */
     public static String baseUrl() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String environmentUrl = get(environment() + ".base_url");
+
+        if (environmentUrl != null && !environmentUrl.isBlank()) {
+            return environmentUrl;
+        }
+
+        return get("base_url");
     }
 
     /** Returns TestNG thread count: Maven/System property > config.properties > default 2. */
     public static int getThreadCount() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        String systemValue = System.getProperty("thread.count");
+        if (systemValue != null && !systemValue.isBlank()) {
+            return parsePositiveThreadCount(systemValue, "Maven/System property");
+        }
+        String configValue = PROPERTIES.getProperty("thread.count");
+        if (configValue != null && !configValue.isBlank()) {
+            return parsePositiveThreadCount(configValue, "config.properties");
+        }
+        return 2;
     }
 
     /** Parses and validates a positive thread count. */
     private static int parsePositiveThreadCount(String value, String source) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        try {
+            int threadCount = Integer.parseInt(value.trim());
+            if (threadCount <= 0) {
+                throw new IllegalArgumentException("thread.count from " + source + " must be greater than 0. Actual value: " + value);
+            }
+            return threadCount;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid thread.count from " + source + ": " + value, e);
+        }
     }
 
 
@@ -100,8 +128,37 @@ public final class ConfigReader {
      * @return normalized execution mode: local or remote
      */
     public static String getExecutionMode() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        String value =
+                System.getProperty(
+                        "execution.mode"
+                );
+
+        if (value == null
+                || value.isBlank()) {
+
+            value =
+                    PROPERTIES.getProperty(
+                            "execution.mode",
+                            "local"
+                    );
+        }
+
+        value =
+                value.trim()
+                     .toLowerCase();
+
+        if (!value.equals("local")
+                && !value.equals("remote")) {
+
+            throw new IllegalArgumentException(
+                    "Unsupported execution.mode: "
+                            + value
+                            + ". Supported values: local, remote"
+            );
+        }
+
+        return value;
     }
 
 }

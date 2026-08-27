@@ -20,8 +20,7 @@ public class PaymentPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public PaymentPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -53,13 +52,19 @@ public class PaymentPage extends BasePage {
      * Fills all payment fields through custom UiActions.
      */
     public PaymentPage fill(Payment payment) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.type(nameOnCard, payment.getNameOnCard());
+        actions.type(cardNumber, payment.getCardNumber());
+        actions.type(cvc, payment.getCvc());
+        actions.type(expiryMonth, payment.getExpiryMonth());
+        actions.type(expiryYear, payment.getExpiryYear());
+        return this;
     }
 
     /** Submits payment and returns order-confirmation page. */
     public OrderPlacedPage payAndConfirm() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(payButton);
+        return new OrderPlacedPage();
     }
 }

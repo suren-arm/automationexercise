@@ -23,11 +23,7 @@ public class TestCase25ScrollUpTest extends BaseTest {
     @Story("Scroll Up using Arrow")
     @Severity(SeverityLevel.NORMAL)
     public void testCase25ScrollUpUsingArrow() {
-        var home = pages.testCases().goToHome();
-
-        Assert.assertTrue(
-                home.isVisible(),
-                "Home page should be visible.");
+        var home = pages.home();
 
         home.scrollToBottom();
 

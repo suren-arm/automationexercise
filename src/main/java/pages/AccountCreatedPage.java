@@ -16,8 +16,7 @@ public class AccountCreatedPage extends BasePage {
      * elements through PageFactory.</p>
      */
     public AccountCreatedPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        super();
     }
 
 
@@ -31,13 +30,14 @@ public class AccountCreatedPage extends BasePage {
 
     /** Returns confirmation text. */
     public String getConfirmation() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        return actions.getText(confirmation);
     }
 
     /** Continues to authenticated Home. */
     public HomePage continueToHome() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+
+        actions.click(continueButton);
+        return new HomePage();
     }
 }
