@@ -4,40 +4,27 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 /**
- * Account-deleted confirmation page used by TC1 and TC16 cleanup.
+ * "ACCOUNT DELETED!" confirmation page used by the TC1 and TC16 cleanup steps.
  */
 public class AccountDeletedPage extends BasePage {
-    /**
-     * Creates the AccountDeletedPage Page Object.
-     *
-     * <p>Calling super() invokes the BasePage constructor, which:
-     * gets the thread-safe driver, creates waits, checks the Google vignette,
-     * creates reusable action wrappers, and initializes this page's @FindBy
-     * elements through PageFactory.</p>
-     */
-    public AccountDeletedPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
 
-
-    /** Account Deleted confirmation. */
-    @FindBy(xpath = "//h2[@data-qa='account-deleted']//b")
+    @FindBy(css = "[data-qa='account-deleted']")
     private WebElement confirmation;
 
-    /** Continue button. */
     @FindBy(css = "a[data-qa='continue-button']")
     private WebElement continueButton;
 
-    /** Returns confirmation text. */
+    /**
+     * Returns the confirmation text in upper case; see
+     * {@link AccountCreatedPage#getConfirmation()} for why it is normalised.
+     */
     public String getConfirmation() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return actions.getText(confirmation).toUpperCase();
     }
 
-    /** Continues back to Home. */
+    /** Continues back to the home page. */
     public HomePage continueToHome() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        actions.click(continueButton);
+        return new HomePage();
     }
 }

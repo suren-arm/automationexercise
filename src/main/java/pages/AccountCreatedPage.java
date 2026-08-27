@@ -4,40 +4,28 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 /**
- * Account-created confirmation page.
+ * "ACCOUNT CREATED!" confirmation page.
  */
 public class AccountCreatedPage extends BasePage {
-    /**
-     * Creates the AccountCreatedPage Page Object.
-     *
-     * <p>Calling super() invokes the BasePage constructor, which:
-     * gets the thread-safe driver, creates waits, checks the Google vignette,
-     * creates reusable action wrappers, and initializes this page's @FindBy
-     * elements through PageFactory.</p>
-     */
-    public AccountCreatedPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
 
-
-    /** Account Created confirmation. */
-    @FindBy(xpath = "//h2[@data-qa='account-created']//b")
+    @FindBy(css = "[data-qa='account-created']")
     private WebElement confirmation;
 
-    /** Continue button. */
     @FindBy(css = "a[data-qa='continue-button']")
     private WebElement continueButton;
 
-    /** Returns confirmation text. */
+    /**
+     * The markup says "Account Created!" and CSS uppercases it. Normalising
+     * here lets tests assert the official wording without depending on whether
+     * a driver reports rendered or raw text.
+     */
     public String getConfirmation() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return actions.getText(confirmation).toUpperCase();
     }
 
-    /** Continues to authenticated Home. */
+    /** Continues to the home page as an authenticated user. */
     public HomePage continueToHome() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        actions.click(continueButton);
+        return new HomePage();
     }
 }

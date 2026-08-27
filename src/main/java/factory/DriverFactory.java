@@ -12,71 +12,135 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 /**
- * Thread-safe WebDriver factory.
- *
- * <p>No test class creates WebDriver directly. The factory owns browser
- * initialization, browser selection, configuration, access and cleanup.</p>
+ * Owns the WebDriver for each test thread. Held in a {@link ThreadLocal} so
+ * TestNG can run classes in parallel without sharing a browser.
  */
 public final class DriverFactory {
 
-    /** Framework logger. */
     private static final Logger LOG = LogManager.getLogger(DriverFactory.class);
 
-    /** One WebDriver instance per TestNG worker thread. */
     private static final ThreadLocal<WebDriver> DRIVER = new ThreadLocal<>();
 
-    /** Static utility class. */
     private DriverFactory() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
     }
 
-    /**
-     * Creates the configured browser.
-     *
-     * @return current thread's WebDriver
-     */
+    /** Creates the configured browser for the current thread. */
     public static WebDriver createDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+        String browser = ConfigReader.browser().trim().toLowerCase();
+        boolean headless = ConfigReader.headless();
 
-    /** Creates ChromeDriver with framework options. */
-    private static WebDriver createChrome(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+        WebDriver driver = switch (browser) {
+            case "chrome" -> createChrome(headless);
+            case "firefox", "gecko" -> createFirefox(headless);
+            case "edge" -> createEdge(headless);
+            default -> throw new IllegalArgumentException(
+                    "Unsupported browser: " + browser
+                            + ". Supported values: chrome, firefox/gecko, edge.");
+        };
 
-    /** Creates FirefoxDriver/GeckoDriver with framework options. */
-    private static WebDriver createFirefox(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+        DRIVER.set(driver);
 
-    /** Creates EdgeDriver with framework options. */
-    private static WebDriver createEdge(boolean headless) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        // A clean session per test: no cookie may carry a login between tests.
+        driver.manage().deleteAllCookies();
+
+        if (!headless) {
+            driver.manage().window().maximize();
+        }
+
+        LOG.info("Created {} driver (headless={}) on thread {}",
+                browser, headless, Thread.currentThread().getName());
+
+        return driver;
     }
 
     /**
-     * Returns the current thread's driver.
+     * Sends the ad networks the site embeds to a dead address, so their scripts
+     * never load and cannot cover the page.
      *
-     * @return current WebDriver
+     * <p>Cheaper and more reliable than dismissing an overlay after it appears,
+     * but it only covers Chromium: Firefox has no equivalent switch, and a new
+     * ad host would not be on this list. {@code InterruptionHandler} therefore
+     * stays as the safety net.</p>
      */
+    private static final String BLOCK_AD_HOSTS = "--host-resolver-rules="
+            + "MAP *.doubleclick.net 127.0.0.1,"
+            + "MAP *.googlesyndication.com 127.0.0.1,"
+            + "MAP *.googleadservices.com 127.0.0.1,"
+            + "MAP *.googletagservices.com 127.0.0.1,"
+            + "MAP *.adtrafficquality.google 127.0.0.1,"
+            + "MAP adservice.google.com 127.0.0.1,"
+            + "MAP fundingchoicesmessages.google.com 127.0.0.1";
+
+    private static WebDriver createChrome(boolean headless) {
+        ChromeOptions options = new ChromeOptions();
+
+        if (headless) {
+            // A fixed window size keeps headless layout comparable to headed,
+            // which matters for scroll-dependent behaviour.
+            options.addArguments("--headless=new", "--window-size=1920,1080");
+        }
+
+        options.addArguments("--disable-notifications", BLOCK_AD_HOSTS);
+        return new ChromeDriver(options);
+    }
+
+    /** Firefox has no host-blocking switch, so ads are handled at runtime here. */
+    private static WebDriver createFirefox(boolean headless) {
+        FirefoxOptions options = new FirefoxOptions();
+
+        if (headless) {
+            options.addArguments("-headless", "--width=1920", "--height=1080");
+        }
+
+        return new FirefoxDriver(options);
+    }
+
+    private static WebDriver createEdge(boolean headless) {
+        EdgeOptions options = new EdgeOptions();
+
+        if (headless) {
+            options.addArguments("--headless=new", "--window-size=1920,1080");
+        }
+
+        options.addArguments("--disable-notifications", BLOCK_AD_HOSTS);
+        return new EdgeDriver(options);
+    }
+
+    /** Whether this thread currently has a driver. */
+    public static boolean hasDriver() {
+        return DRIVER.get() != null;
+    }
+
+    /** Returns this thread's driver. */
     public static WebDriver getDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        WebDriver driver = DRIVER.get();
+
+        if (driver == null) {
+            throw new IllegalStateException(
+                    "WebDriver has not been initialised for thread "
+                            + Thread.currentThread().getName() + ".");
+        }
+
+        return driver;
     }
 
     /**
-     * Quits and removes the current thread's WebDriver.
-     *
-     * <p>ThreadLocal.remove() avoids stale references when TestNG worker
-     * threads are reused.</p>
+     * {@code remove()} runs in a {@code finally} so the slot is cleared even if
+     * {@code quit()} fails - TestNG reuses worker threads, and a stale reference
+     * would be handed to the next test.
      */
     public static void quitDriver() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        WebDriver driver = DRIVER.get();
+
+        if (driver == null) {
+            return;
+        }
+
+        try {
+            driver.quit();
+            LOG.info("Driver closed on thread {}", Thread.currentThread().getName());
+        } finally {
+            DRIVER.remove();
+        }
     }
 }

@@ -7,32 +7,47 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 import utils.ScreenshotUtils;
 
+import java.io.ByteArrayInputStream;
+
 /**
- * TestNG listener for result logging and failure screenshots.
+ * Per-test result logging and failure screenshots.
+ *
+ * <p>This is the only place a screenshot is captured. Neither BaseTest nor the
+ * tests themselves take one, so a failure produces exactly one attachment.</p>
  */
 public class TestListener implements ITestListener {
 
-    /** Listener logger. */
     private static final Logger LOG = LogManager.getLogger(TestListener.class);
 
-    /** Logs passed tests. */
+    @Override
+    public void onTestStart(ITestResult result) {
+        LOG.info("START  : {}", name(result));
+    }
+
     @Override
     public void onTestSuccess(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.info("PASSED : {}", name(result));
     }
 
-    /** Logs skipped tests. */
     @Override
     public void onTestSkipped(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.warn("SKIPPED: {}", name(result));
     }
 
-    /** Logs failure and attaches screenshot to Allure. */
     @Override
     public void onTestFailure(ITestResult result) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        LOG.error("FAILED : {}", name(result), result.getThrowable());
+
+        ScreenshotUtils.capture().ifPresent(png ->
+                Allure.addAttachment(
+                        "Failure screenshot - " + name(result),
+                        "image/png",
+                        new ByteArrayInputStream(png),
+                        ".png"));
+    }
+
+    private String name(ITestResult result) {
+        return result.getTestClass().getRealClass().getSimpleName()
+                + "." + result.getMethod().getMethodName();
     }
 }

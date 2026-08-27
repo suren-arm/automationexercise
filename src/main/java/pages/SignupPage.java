@@ -1,36 +1,29 @@
 package pages;
 
 import models.Account;
+import models.Gender;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 /**
- * Full account-registration form used by TC1 and as TC16 account precondition.
+ * "ENTER ACCOUNT INFORMATION" registration form.
  */
 public class SignupPage extends BasePage {
-    /**
-     * Creates the SignupPage Page Object.
-     *
-     * <p>Calling super() invokes the BasePage constructor, which:
-     * gets the thread-safe driver, creates waits, checks the Google vignette,
-     * creates reusable action wrappers, and initializes this page's @FindBy
-     * elements through PageFactory.</p>
-     */
-    public SignupPage() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
 
-
-    /** Account Information heading. */
     @FindBy(xpath = "//b[normalize-space()='Enter Account Information']")
     private WebElement heading;
 
     @FindBy(id = "id_gender1")
-    private WebElement mr;
+    private WebElement titleMr;
 
     @FindBy(id = "id_gender2")
-    private WebElement mrs;
+    private WebElement titleMrs;
+
+    @FindBy(id = "name")
+    private WebElement name;
+
+    @FindBy(id = "email")
+    private WebElement email;
 
     @FindBy(id = "password")
     private WebElement password;
@@ -83,21 +76,72 @@ public class SignupPage extends BasePage {
     @FindBy(css = "button[data-qa='create-account']")
     private WebElement createAccount;
 
-    /** Returns whether account-information form is visible. */
+    /** Whether the account information form is displayed. */
     public boolean isVisible() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return actions.isDisplayed(heading);
     }
 
-    /** Fills the complete account form from an Account Builder object. */
+    /** Name carried over from the signup step, pre-filled by the site. */
+    public String getPrefilledName() {
+        return actions.getValue(name);
+    }
+
+    /** Email carried over from the signup step, pre-filled by the site. */
+    public String getPrefilledEmail() {
+        return actions.getValue(email);
+    }
+
+    /** Whether the newsletter checkbox is ticked. */
+    public boolean isNewsletterSelected() {
+        return actions.isSelected(newsletter);
+    }
+
+    /** Whether the special-offers checkbox is ticked. */
+    public boolean isOffersSelected() {
+        return actions.isSelected(offers);
+    }
+
+    /**
+     * Fills the whole registration form.
+     *
+     * <p>Checkboxes are toggled only when their current state differs from the
+     * requested one, so the method is safe to call regardless of the defaults
+     * the site ships with.</p>
+     */
     public SignupPage fill(Account account) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        actions.click(account.getGender() == Gender.MRS ? titleMrs : titleMr);
+
+        actions.type(password, account.getPassword());
+
+        actions.selectByVisibleText(days, account.getDay());
+        actions.selectByVisibleText(months, account.getMonth());
+        actions.selectByVisibleText(years, account.getYear());
+
+        if (account.isNewsletter() != actions.isSelected(newsletter)) {
+            actions.click(newsletter);
+        }
+
+        if (account.isOffers() != actions.isSelected(offers)) {
+            actions.click(offers);
+        }
+
+        actions.type(firstName, account.getFirstName());
+        actions.type(lastName, account.getLastName());
+        actions.type(company, account.getCompany());
+        actions.type(address1, account.getAddress1());
+        actions.type(address2, account.getAddress2());
+        actions.selectByVisibleText(country, account.getCountry());
+        actions.type(state, account.getState());
+        actions.type(city, account.getCity());
+        actions.type(zipCode, account.getZipCode());
+        actions.type(mobile, account.getMobileNumber());
+
+        return this;
     }
 
-    /** Submits registration. */
+    /** Submits the registration form. */
     public AccountCreatedPage createAccount() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        actions.click(createAccount);
+        return new AccountCreatedPage();
     }
 }

@@ -1,44 +1,66 @@
 package tests;
 
-import config.ConfigReader;
-import io.qameta.allure.*;
-import org.testng.Assert;
+import config.TestData;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.testng.annotations.Test;
+import pages.HomePage;
 import tests.base.BaseTest;
 
-/**
- * Official Automation Exercise Test Case 25 -
- * Verify Scroll Up using Arrow button and Scroll Down functionality.
- */
+import static org.testng.Assert.assertTrue;
+
 @Epic("Automation Exercise")
 @Feature("Test Case 25")
 public class TestCase25ScrollUpTest extends BaseTest {
 
     /**
-     * Executes TC25 exactly:
-     * Home -> scroll bottom -> verify Subscription -> click arrow ->
-     * verify hero text at top.
+     * Scrolls to the subscription section at the foot of the home page, then
+     * returns to the top using the scroll-up arrow.
+     *
+     * <p>Each scroll is checked against the window offset as well as element
+     * visibility: Selenium reports visibility from CSS, not from what is inside
+     * the viewport, so a visibility check alone would pass even if nothing had
+     * scrolled. The browser is launched and the site opened by
+     * {@code BaseTest}.</p>
      */
-    @Test(description = "Test Case 25: Verify Scroll Up using Arrow button and Scroll Down functionality")
+    @Test(description = "Test Case 25: Verify Scroll Up using 'Arrow' button "
+            + "and Scroll Down functionality")
     @Story("Scroll Up using Arrow")
     @Severity(SeverityLevel.NORMAL)
-    public void testCase25ScrollUpUsingArrow() {
-        var home = pages.testCases().goToHome();
+    public void scrollDownAndBackToTop() {
+        HomePage home = homePage();
 
-        Assert.assertTrue(
-                home.isVisible(),
-                "Home page should be visible.");
+        assertTrue(home.isVisible(),
+                "Home page should be visible after navigating to the base URL.");
+
+        // Scroll to the bottom
+        long initialPosition = home.getScrollPosition();
 
         home.scrollToBottom();
 
-        Assert.assertTrue(
-                home.isSubscriptionVisible(),
-                "SUBSCRIPTION should be visible.");
+        long bottomPosition = home.getScrollPosition();
 
-        home.clickScrollUpArrow();
+        assertTrue(bottomPosition > initialPosition,
+                "Page should have scrolled down. Offset went from "
+                        + initialPosition + "px to " + bottomPosition + "px.");
+        assertTrue(home.isSubscriptionVisible(),
+                "'SUBSCRIPTION' should be visible at the bottom of the home page.");
 
-        Assert.assertTrue(
-                home.getHeroText().contains(ConfigReader.get("home.hero.text")),
-                "Full-Fledged practice website for Automation Engineers should be visible.");
+        // Return to the top using the arrow
+        assertTrue(home.isScrollUpArrowVisible(),
+                "Scroll-up arrow should be offered once the page is scrolled down.");
+
+        boolean returnedToTop = home.clickScrollUpArrowAndWaitForTop();
+
+        assertTrue(returnedToTop,
+                "Page should scroll back to the top after clicking the arrow. "
+                        + "Final offset: " + home.getScrollPosition() + "px.");
+        assertTrue(home.getHeroText().contains(TestData.homeHeroText()),
+                "Hero text '" + TestData.homeHeroText()
+                        + "' should be visible after scrolling back up, but was: '"
+                        + home.getHeroText() + "'.");
     }
 }

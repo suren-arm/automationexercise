@@ -1,9 +1,16 @@
 target/
 allure-results/
 allure-report/
+test-output/
+logs/
+*.log
+.DS_Store
+
+# Editor and IDE state. Run behaviour is defined by config.properties and
+# testng.xml alone, so no IDE run configuration is kept here - a checked-in one
+# is a second place for settings to live, and it can only drift out of step
+# with the build.
 .idea/
 *.iml
 .vscode/
-*.log
-.DS_Store
-logs/
+.run/

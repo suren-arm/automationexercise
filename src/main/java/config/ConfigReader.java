@@ -1,107 +1,68 @@
 package config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 /**
- * Reads framework configuration.
+ * How the tests run. Business values belong in {@link TestData}.
  *
- * <p>Java system properties have priority over config.properties. Therefore
- * Jenkins can override browser, headless mode, or environment without changing
- * source code.</p>
+ * <p>Any key can be overridden with a {@code -D} system property for a single
+ * run.</p>
  */
 public final class ConfigReader {
 
-    /** Loaded configuration values. */
-    private static final Properties PROPERTIES = new Properties();
+    private static final PropertiesLoader CONFIG = new PropertiesLoader("config.properties");
 
-    /** Loads config.properties once when the class is initialized. */
-    static {
-        // TODO: initialize static framework state.
-    }
-
-    /** Utility class; object creation is not required. */
     private ConfigReader() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
     }
 
-    /**
-     * Returns configuration by key.
-     *
-     * @param key property name
-     * @return JVM system value when supplied, otherwise file value
-     */
-    public static String get(String key) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    /** Returns selected browser. */
+    /** chrome, firefox/gecko or edge. */
     public static String browser() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return CONFIG.getRequired("browser");
     }
 
-    /** Returns configured explicit-wait timeout in seconds. */
-    public static int timeout() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    /** Returns whether browser should run headlessly. */
     public static boolean headless() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return Boolean.parseBoolean(CONFIG.getRequired("headless"));
     }
 
-    /** Returns selected environment name. */
-    public static String environment() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+    public static int explicitWaitSeconds() {
+        return positiveInt("explicit.wait.seconds");
+    }
+
+    /** TestNG worker threads, applied by {@code SuiteListener}. 1 = sequential. */
+    public static int threadCount() {
+        return positiveInt("thread.count");
     }
 
     /**
-     * Returns assignment base URL.
-     *
-     * <p>The user explicitly requested
-     * https://automationexercise.com/test_cases as base_url.</p>
+     * Fails loudly rather than defaulting: a typo in a count would otherwise
+     * change how the suite runs while looking like it worked.
      */
+    private static int positiveInt(String key) {
+        String value = CONFIG.getRequired(key);
+
+        try {
+            int parsed = Integer.parseInt(value.trim());
+
+            if (parsed <= 0) {
+                throw new IllegalStateException(
+                        key + " must be greater than 0 but was: " + value);
+            }
+
+            return parsed;
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid " + key + ": " + value, e);
+        }
+    }
+
     public static String baseUrl() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
+        return CONFIG.getRequired("base.url");
     }
-
-    /** Returns TestNG thread count: Maven/System property > config.properties > default 2. */
-    public static int getThreadCount() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    /** Parses and validates a positive thread count. */
-    private static int parsePositiveThreadCount(String value, String source) {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
-
-
 
     /**
-     * Returns the configured execution mode.
-     *
-     * <p>Priority is the same as other framework properties:</p>
-     * <ol>
-     *     <li>System/Maven property: {@code -Dexecution.mode=remote}</li>
-     *     <li>{@code config.properties}: {@code execution.mode=local}</li>
-     *     <li>Fallback: {@code local}</li>
-     * </ol>
-     *
-     * @return normalized execution mode: local or remote
+     * Configured log level as written, or {@code INFO} if absent.
+     * {@link LoggingConfigurator} decides whether it names a real level.
      */
-    public static String getExecutionMode() {
-        // TODO: implement.
-        throw new UnsupportedOperationException("TODO");
-    }
+    public static String logLevel() {
+        String value = CONFIG.get("LOG_LEVEL");
 
+        return value == null || value.isBlank() ? "INFO" : value.trim();
+    }
 }
