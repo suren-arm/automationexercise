@@ -20,10 +20,10 @@ public class OrderPlacedPage extends BasePage {
                     + " or contains(normalize-space(),'Your order has been confirmed')]");
 
     public boolean isOrderPlacedHeadingVisible() {
-        return actions.isDisplayed(ORDER_PLACED_HEADING);
+        return uiActions.isDisplayed(ORDER_PLACED_HEADING);
     }
 
     public boolean isOrderPlacedSuccessfully() {
-        return actions.isDisplayed(SUCCESS_MESSAGE);
+        return uiActions.isDisplayed(SUCCESS_MESSAGE);
     }
 }

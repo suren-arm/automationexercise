@@ -18,9 +18,9 @@ import utils.WaitUtils;
  */
 public abstract class BasePage {
 
-    protected final WaitUtils wait;
-    protected final UiActions actions;
-    protected final BrowserActions browser;
+    protected final WaitUtils waitUtils;
+    protected final UiActions uiActions;
+    protected final BrowserActions browserActions;
 
     @FindBy(css = "a[href='/products']")
     private WebElement productsMenu;
@@ -45,40 +45,40 @@ public abstract class BasePage {
         // UiActions, which applies waiting, logging and ad recovery.
         WebDriver driver = DriverFactory.getDriver();
 
-        this.wait = new WaitUtils(driver);
-        this.actions = new UiActions(driver);
-        this.browser = new BrowserActions(driver);
+        this.waitUtils = new WaitUtils(driver);
+        this.uiActions = new UiActions(driver);
+        this.browserActions = new BrowserActions(driver);
 
         PageFactory.initElements(driver, this);
     }
 
     public ProductsPage goToProducts() {
-        actions.click(productsMenu);
+        uiActions.click(productsMenu);
         return new ProductsPage();
     }
 
     public CartPage goToCart() {
-        actions.click(cartMenu);
+        uiActions.click(cartMenu);
         return new CartPage();
     }
 
     public LoginPage goToSignupLogin() {
-        actions.click(signupLoginMenu);
+        uiActions.click(signupLoginMenu);
         return new LoginPage();
     }
 
     public LoginPage logout() {
-        actions.click(logoutMenu);
+        uiActions.click(logoutMenu);
         return new LoginPage();
     }
 
     public AccountDeletedPage deleteAccount() {
-        actions.click(deleteAccountMenu);
+        uiActions.click(deleteAccountMenu);
         return new AccountDeletedPage();
     }
 
     public boolean isLoggedIn() {
-        return actions.isDisplayed(loggedInAsMenu);
+        return uiActions.isDisplayed(loggedInAsMenu);
     }
 
     /**
@@ -86,12 +86,12 @@ public abstract class BasePage {
      * which would burn the full timeout waiting for something to disappear.
      */
     public boolean isSignedOut() {
-        return actions.isDisplayed(signupLoginMenu);
+        return uiActions.isDisplayed(signupLoginMenu);
     }
 
     /** Header username with the "Logged in as" prefix stripped. */
     public String getLoggedInUsername() {
-        return actions.getText(loggedInAsMenu)
+        return uiActions.getText(loggedInAsMenu)
                 .replace("Logged in as", "")
                 .trim();
     }

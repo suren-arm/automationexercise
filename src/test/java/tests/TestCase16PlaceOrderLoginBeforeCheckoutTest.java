@@ -9,8 +9,16 @@ import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import models.Account;
 import models.Payment;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+import pages.AccountCreatedPage;
+import pages.AccountDeletedPage;
+import pages.CartPage;
+import pages.CheckoutPage;
 import pages.HomePage;
+import pages.LoginPage;
+import pages.OrderPlacedPage;
 import tests.base.BaseTest;
 
 import static org.testng.Assert.assertEquals;
@@ -20,107 +28,125 @@ import static org.testng.Assert.assertTrue;
 @Feature("Test Case 16")
 public class TestCase16PlaceOrderLoginBeforeCheckoutTest extends BaseTest {
 
+    private Account account;
+    private Payment payment;
+    private LoginPage loginPage;
+
     /**
-     * Logs an existing user in, buys a product through checkout and payment, and
-     * confirms the order is placed.
+     * Registers the user the scenario assumes already exists, then signs out so
+     * the test can begin at the official first step.
      *
-     * <p>The scenario starts at the login step, so it needs a registered user.
-     * The test creates one itself rather than depending on Test Case 1 or a
-     * shared account, which keeps it runnable alone, in any order, and
-     * repeatedly. The browser is launched and the site opened by
-     * {@code BaseTest}.</p>
+     * <p>This lives outside the test on purpose: a failure to register is a
+     * precondition that could not be met, so it is reported as a configuration
+     * failure and the test is skipped rather than recorded as "placing an order
+     * is broken". Creating its own account is also what keeps the scenario
+     * independent of Test Case 1 and repeatable.</p>
+     */
+    @BeforeMethod
+    public void registerUserAndSignOut() {
+        account = Account.builder().build();
+        payment = Payment.builder().nameOnCard(account.getName()).build();
+
+        log.debug("Placing an order as {}", account.getEmail());
+
+        HomePage homePage = homePage();
+
+        assertTrue(homePage.isVisible(),
+                "Home page should be visible after navigating to the base URL.");
+
+        loginPage = registerAccountToLogInWith(account).logout();
+    }
+
+    /**
+     * Logs the registered user in, buys a product through checkout and payment,
+     * and confirms the order is placed.
      */
     @Test(description = "Test Case 16: Place Order - Login before Checkout")
     @Story("Place Order: Login before Checkout")
     @Severity(SeverityLevel.BLOCKER)
     public void placeOrderAfterLogin() {
-        Account account = Account.builder().build();
-        Payment payment = Payment.builder().nameOnCard(account.getName()).build();
-
-        log.debug("Placing an order as {}", account.getEmail());
-
-        HomePage home = homePage();
-
-        assertTrue(home.isVisible(),
-                "Home page should be visible after navigating to the base URL.");
-
-        // Prerequisite: the scenario assumes a user that already exists
-        home = registerAccountToLogInWith(account);
-
-        // Log in
-        var login = home.logout();
-
-        assertTrue(login.isLoginVisible(),
+        assertTrue(loginPage.isLoginVisible(),
                 "'Login to your account' should be visible after logging out.");
 
-        home = login.enterLogin(account).clickLogin();
+        HomePage homePage = loginPage.enterLogin(account).clickLogin();
 
-        assertTrue(home.isLoggedIn(),
+        assertTrue(homePage.isLoggedIn(),
                 "'Logged in as username' should be visible after logging in.");
-        assertEquals(home.getLoggedInUsername(), account.getName(),
+        assertEquals(homePage.getLoggedInUsername(), account.getName(),
                 "Header should show the username of the account that logged in.");
 
         // Add a product and open the cart
-        home.addFirstProductToCart();
+        homePage.addFirstProductToCart();
 
-        var cart = home.goToCart();
+        CartPage cartPage = homePage.goToCart();
 
-        assertTrue(cart.isVisible(),
+        assertTrue(cartPage.isVisible(),
                 "Cart page should be displayed after clicking Cart.");
-        assertTrue(cart.getItemCount() > 0,
+        assertTrue(cartPage.getItemCount() > 0,
                 "Cart should contain the product that was just added.");
 
         // Check out and confirm the order details
-        var checkout = cart.proceedToCheckout();
+        CheckoutPage checkoutPage = cartPage.proceedToCheckout();
 
-        assertTrue(checkout.isAddressDetailsVisible(),
+        // Hard: the rest of this block reads the checkout page, so it has to
+        // have loaded before any of those checks mean anything.
+        assertTrue(checkoutPage.isAddressDetailsVisible(),
                 "'Address Details' should be visible on the checkout page.");
-        assertTrue(checkout.isReviewOrderVisible(),
+
+        // Independent details of the same page - a wrong address does not stop
+        // the order contents being worth checking, and vice versa.
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertTrue(checkoutPage.isReviewOrderVisible(),
                 "'Review Your Order' should be visible on the checkout page.");
-        assertTrue(checkout.getDeliveryAddressText().contains(account.getAddress1()),
+        softAssert.assertTrue(
+                checkoutPage.getDeliveryAddressText().contains(account.getAddress1()),
                 "Delivery address should show the address registered for this account.");
-        assertTrue(checkout.getReviewedItemCount() > 0,
+        softAssert.assertTrue(checkoutPage.getReviewedItemCount() > 0,
                 "Order review should list the product being purchased.");
 
+        // Before paying: an order whose details are wrong should not be placed.
+        softAssert.assertAll();
+
         // Pay
-        var orderPlaced = checkout
+        OrderPlacedPage orderPlacedPage = checkoutPage
                 .enterComment(TestData.checkoutComment())
                 .placeOrder()
                 .fill(payment)
                 .payAndConfirm();
 
-        assertTrue(orderPlaced.isOrderPlacedHeadingVisible(),
+        assertTrue(orderPlacedPage.isOrderPlacedHeadingVisible(),
                 "'ORDER PLACED!' confirmation heading should be visible.");
-        assertTrue(orderPlaced.isOrderPlacedSuccessfully(),
+        assertTrue(orderPlacedPage.isOrderPlacedSuccessfully(),
                 "Order confirmation message should be visible after paying.");
 
         // Clean up
-        var deleted = orderPlaced.deleteAccount();
+        AccountDeletedPage accountDeletedPage = orderPlacedPage.deleteAccount();
 
-        assertEquals(deleted.getConfirmation(), "ACCOUNT DELETED!",
+        assertEquals(accountDeletedPage.getConfirmation(), "ACCOUNT DELETED!",
                 "'ACCOUNT DELETED!' should be displayed after deleting the account.");
-        assertTrue(deleted.continueToHome().isVisible(),
+        assertTrue(accountDeletedPage.continueToHome().isVisible(),
                 "Home page should be visible after continuing from account deletion.");
     }
 
     /** @return the home page, signed in as the newly registered account */
     @Step("Register the account that will log in before checkout")
     private HomePage registerAccountToLogInWith(Account account) {
-        var created = homePage()
+        AccountCreatedPage accountCreatedPage = homePage()
                 .goToSignupLogin()
                 .enterSignup(account)
                 .clickSignup()
                 .fill(account)
                 .createAccount();
 
-        assertEquals(created.getConfirmation(), "ACCOUNT CREATED!",
+        assertEquals(accountCreatedPage.getConfirmation(), "ACCOUNT CREATED!",
                 "Prerequisite account for this scenario should be created.");
 
-        HomePage signedIn = created.continueToHome();
+        HomePage signedInHomePage = accountCreatedPage.continueToHome();
 
-        assertTrue(signedIn.isLoggedIn(),
+        assertTrue(signedInHomePage.isLoggedIn(),
                 "Prerequisite account should be logged in after registration.");
 
-        return signedIn;
+        return signedInHomePage;
     }
 }

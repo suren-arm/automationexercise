@@ -78,27 +78,27 @@ public class SignupPage extends BasePage {
 
     /** Whether the account information form is displayed. */
     public boolean isVisible() {
-        return actions.isDisplayed(heading);
+        return uiActions.isDisplayed(heading);
     }
 
     /** Name carried over from the signup step, pre-filled by the site. */
     public String getPrefilledName() {
-        return actions.getValue(name);
+        return uiActions.getValue(name);
     }
 
     /** Email carried over from the signup step, pre-filled by the site. */
     public String getPrefilledEmail() {
-        return actions.getValue(email);
+        return uiActions.getValue(email);
     }
 
     /** Whether the newsletter checkbox is ticked. */
     public boolean isNewsletterSelected() {
-        return actions.isSelected(newsletter);
+        return uiActions.isSelected(newsletter);
     }
 
     /** Whether the special-offers checkbox is ticked. */
     public boolean isOffersSelected() {
-        return actions.isSelected(offers);
+        return uiActions.isSelected(offers);
     }
 
     /**
@@ -109,39 +109,39 @@ public class SignupPage extends BasePage {
      * the site ships with.</p>
      */
     public SignupPage fill(Account account) {
-        actions.click(account.getGender() == Gender.MRS ? titleMrs : titleMr);
+        uiActions.click(account.getGender() == Gender.MRS ? titleMrs : titleMr);
 
-        actions.type(password, account.getPassword());
+        uiActions.type(password, account.getPassword());
 
-        actions.selectByVisibleText(days, account.getDay());
-        actions.selectByVisibleText(months, account.getMonth());
-        actions.selectByVisibleText(years, account.getYear());
+        uiActions.selectByVisibleText(days, account.getDay());
+        uiActions.selectByVisibleText(months, account.getMonth());
+        uiActions.selectByVisibleText(years, account.getYear());
 
-        if (account.isNewsletter() != actions.isSelected(newsletter)) {
-            actions.click(newsletter);
+        if (account.isNewsletter() != uiActions.isSelected(newsletter)) {
+            uiActions.click(newsletter);
         }
 
-        if (account.isOffers() != actions.isSelected(offers)) {
-            actions.click(offers);
+        if (account.isOffers() != uiActions.isSelected(offers)) {
+            uiActions.click(offers);
         }
 
-        actions.type(firstName, account.getFirstName());
-        actions.type(lastName, account.getLastName());
-        actions.type(company, account.getCompany());
-        actions.type(address1, account.getAddress1());
-        actions.type(address2, account.getAddress2());
-        actions.selectByVisibleText(country, account.getCountry());
-        actions.type(state, account.getState());
-        actions.type(city, account.getCity());
-        actions.type(zipCode, account.getZipCode());
-        actions.type(mobile, account.getMobileNumber());
+        uiActions.type(firstName, account.getFirstName());
+        uiActions.type(lastName, account.getLastName());
+        uiActions.type(company, account.getCompany());
+        uiActions.type(address1, account.getAddress1());
+        uiActions.type(address2, account.getAddress2());
+        uiActions.selectByVisibleText(country, account.getCountry());
+        uiActions.type(state, account.getState());
+        uiActions.type(city, account.getCity());
+        uiActions.type(zipCode, account.getZipCode());
+        uiActions.type(mobile, account.getMobileNumber());
 
         return this;
     }
 
     /** Submits the registration form. */
     public AccountCreatedPage createAccount() {
-        actions.click(createAccount);
+        uiActions.click(createAccount);
         return new AccountCreatedPage();
     }
 }

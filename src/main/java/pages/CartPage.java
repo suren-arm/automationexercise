@@ -29,17 +29,17 @@ public class CartPage extends BasePage {
 
     /** Whether the cart page is displayed. */
     public boolean isVisible() {
-        return actions.isDisplayed(heading);
+        return uiActions.isDisplayed(heading);
     }
 
     /** Number of product rows currently in the cart. */
     public int getItemCount() {
-        return actions.getTexts(CART_PRODUCT_ROWS).size();
+        return uiActions.getTexts(CART_PRODUCT_ROWS).size();
     }
 
     /** Proceeds from the cart to checkout. */
     public CheckoutPage proceedToCheckout() {
-        actions.click(proceedToCheckout);
+        uiActions.click(proceedToCheckout);
         return new CheckoutPage();
     }
 }
