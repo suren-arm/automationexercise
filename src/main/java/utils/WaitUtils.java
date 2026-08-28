@@ -50,10 +50,6 @@ public class WaitUtils {
         return wait.until(ExpectedConditions.elementToBeClickable(element));
     }
 
-    public WebElement clickable(By locator) {
-        return wait.until(ExpectedConditions.elementToBeClickable(locator));
-    }
-
     /**
      * Advisory wait for the document to finish parsing.
      *
