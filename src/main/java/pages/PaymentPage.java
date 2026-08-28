@@ -32,17 +32,17 @@ public class PaymentPage extends BasePage {
 
     /** Fills every payment field. */
     public PaymentPage fill(Payment payment) {
-        actions.type(nameOnCard, payment.getNameOnCard());
-        actions.type(cardNumber, payment.getCardNumber());
-        actions.type(cvc, payment.getCvc());
-        actions.type(expiryMonth, payment.getExpiryMonth());
-        actions.type(expiryYear, payment.getExpiryYear());
+        uiActions.type(nameOnCard, payment.getNameOnCard());
+        uiActions.type(cardNumber, payment.getCardNumber());
+        uiActions.type(cvc, payment.getCvc());
+        uiActions.type(expiryMonth, payment.getExpiryMonth());
+        uiActions.type(expiryYear, payment.getExpiryYear());
         return this;
     }
 
     /** Submits payment and lands on the order confirmation page. */
     public OrderPlacedPage payAndConfirm() {
-        actions.click(payButton);
+        uiActions.click(payButton);
         return new OrderPlacedPage();
     }
 }

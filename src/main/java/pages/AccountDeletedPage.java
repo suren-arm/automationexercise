@@ -19,12 +19,12 @@ public class AccountDeletedPage extends BasePage {
      * {@link AccountCreatedPage#getConfirmation()} for why it is normalised.
      */
     public String getConfirmation() {
-        return actions.getText(confirmation).toUpperCase();
+        return uiActions.getText(confirmation).toUpperCase();
     }
 
     /** Continues back to the home page. */
     public HomePage continueToHome() {
-        actions.click(continueButton);
+        uiActions.click(continueButton);
         return new HomePage();
     }
 }

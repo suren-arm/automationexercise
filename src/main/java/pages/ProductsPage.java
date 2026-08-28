@@ -32,23 +32,23 @@ public class ProductsPage extends BasePage {
 
     /** Whether the ALL PRODUCTS listing is displayed. */
     public boolean isVisible() {
-        return actions.isDisplayed(allProductsHeading);
+        return uiActions.isDisplayed(allProductsHeading);
     }
 
     /** Types a search term and submits it. */
     public ProductsPage search(String productName) {
-        actions.type(searchInput, productName);
-        actions.click(searchButton);
+        uiActions.type(searchInput, productName);
+        uiActions.click(searchButton);
         return this;
     }
 
     /** Whether the SEARCHED PRODUCTS heading is displayed. */
     public boolean isSearchResultVisible() {
-        return actions.isDisplayed(searchedProductsHeading);
+        return uiActions.isDisplayed(searchedProductsHeading);
     }
 
     /** Names of every product returned by the search. */
     public List<String> getResultNames() {
-        return actions.getTexts(RESULT_NAMES);
+        return uiActions.getTexts(RESULT_NAMES);
     }
 }

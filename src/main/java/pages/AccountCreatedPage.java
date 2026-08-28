@@ -20,12 +20,12 @@ public class AccountCreatedPage extends BasePage {
      * a driver reports rendered or raw text.
      */
     public String getConfirmation() {
-        return actions.getText(confirmation).toUpperCase();
+        return uiActions.getText(confirmation).toUpperCase();
     }
 
     /** Continues to the home page as an authenticated user. */
     public HomePage continueToHome() {
-        actions.click(continueButton);
+        uiActions.click(continueButton);
         return new HomePage();
     }
 }

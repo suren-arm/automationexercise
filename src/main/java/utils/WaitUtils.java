@@ -13,7 +13,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.function.Function;
+import java.util.function.BooleanSupplier;
 
 /**
  * The framework's only synchronisation point - no implicit waits, no
@@ -26,9 +26,11 @@ public class WaitUtils {
 
     private static final Logger LOG = LogManager.getLogger(WaitUtils.class);
 
+    private final WebDriver driver;
     private final WebDriverWait wait;
 
     public WaitUtils(WebDriver driver) {
+        this.driver = driver;
         this.wait = new WebDriverWait(
                 driver,
                 Duration.ofSeconds(ConfigReader.explicitWaitSeconds()));
@@ -46,10 +48,6 @@ public class WaitUtils {
 
     public WebElement clickable(WebElement element) {
         return wait.until(ExpectedConditions.elementToBeClickable(element));
-    }
-
-    public WebElement clickable(By locator) {
-        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     /**
@@ -78,8 +76,33 @@ public class WaitUtils {
         }
     }
 
-    /** For state no built-in {@code ExpectedCondition} covers, such as scroll position. */
-    public <T> T until(Function<WebDriver, T> condition) {
-        return wait.until(condition);
+    /**
+     * Waits for a condition that needs no driver reference, such as scroll
+     * position.
+     *
+     * <p>Selenium's wait takes a {@code Function<WebDriver, ?>}. Absorbing that
+     * shape here means callers write {@code () -> scrollY() > 0} rather than
+     * declaring a driver parameter they never use.</p>
+     */
+    public void untilTrue(BooleanSupplier condition) {
+        wait.until(ignored -> condition.getAsBoolean());
+    }
+
+    /**
+     * Same, on a shorter budget, reporting the outcome instead of throwing.
+     *
+     * <p>For conditions that are expected to settle far faster than the global
+     * timeout, where waiting it out would only delay a retry or a failure.</p>
+     *
+     * @return whether the condition became true before the timeout
+     */
+    public boolean untilTrue(BooleanSupplier condition, Duration timeout) {
+        try {
+            new WebDriverWait(driver, timeout)
+                    .until(ignored -> condition.getAsBoolean());
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 }

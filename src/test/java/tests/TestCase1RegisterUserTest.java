@@ -7,7 +7,12 @@ import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
 import models.Account;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+import pages.AccountCreatedPage;
+import pages.AccountDeletedPage;
 import pages.HomePage;
+import pages.LoginPage;
+import pages.SignupPage;
 import tests.base.BaseTest;
 
 import static org.testng.Assert.assertEquals;
@@ -30,60 +35,67 @@ public class TestCase1RegisterUserTest extends BaseTest {
         Account account = Account.builder().build();
         log.debug("Registering {}", account.getEmail());
 
-        HomePage home = homePage();
+        HomePage homePage = homePage();
 
-        assertTrue(home.isVisible(),
+        assertTrue(homePage.isVisible(),
                 "Home page should be visible after navigating to the base URL.");
 
         // Start registration
-        var login = home.goToSignupLogin();
+        LoginPage loginPage = homePage.goToSignupLogin();
 
-        assertTrue(login.isSignupVisible(),
+        assertTrue(loginPage.isSignupVisible(),
                 "'New User Signup!' should be visible on the Signup / Login page.");
 
-        var signup = login.enterSignup(account).clickSignup();
+        SignupPage signupPage = loginPage.enterSignup(account).clickSignup();
 
-        assertTrue(signup.isVisible(),
+        assertTrue(signupPage.isVisible(),
                 "'ENTER ACCOUNT INFORMATION' should be visible after clicking Signup.");
 
-        // The site carries the name and email over from the previous step
-        assertEquals(signup.getPrefilledName(), account.getName(),
+        // Four independent facts about the form: the name and email carried over
+        // from the previous step, and both subscription boxes ticked. Soft, so
+        // one wrong field does not hide the other three.
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertEquals(signupPage.getPrefilledName(), account.getName(),
                 "Name should be carried over to the account information form.");
-        assertEquals(signup.getPrefilledEmail(), account.getEmail(),
+        softAssert.assertEquals(signupPage.getPrefilledEmail(), account.getEmail(),
                 "Email should be carried over to the account information form.");
 
         // Complete the account form
-        signup.fill(account);
+        signupPage.fill(account);
 
-        assertTrue(signup.isNewsletterSelected(),
+        softAssert.assertTrue(signupPage.isNewsletterSelected(),
                 "'Sign up for our newsletter!' checkbox should be selected.");
-        assertTrue(signup.isOffersSelected(),
+        softAssert.assertTrue(signupPage.isOffersSelected(),
                 "'Receive special offers from our partners!' checkbox should be selected.");
 
-        var created = signup.createAccount();
+        // Before submitting: the form should be right before an account is made.
+        softAssert.assertAll();
 
-        assertEquals(created.getConfirmation(), "ACCOUNT CREATED!",
+        AccountCreatedPage accountCreatedPage = signupPage.createAccount();
+
+        assertEquals(accountCreatedPage.getConfirmation(), "ACCOUNT CREATED!",
                 "'ACCOUNT CREATED!' should be displayed after submitting the form.");
 
         // Verify the new account is signed in
-        home = created.continueToHome();
+        homePage = accountCreatedPage.continueToHome();
 
-        assertTrue(home.isLoggedIn(),
+        assertTrue(homePage.isLoggedIn(),
                 "'Logged in as username' should be visible after registration.");
-        assertEquals(home.getLoggedInUsername(), account.getName(),
+        assertEquals(homePage.getLoggedInUsername(), account.getName(),
                 "Header should show the username of the account just created.");
 
         // Delete the account
-        var deleted = home.deleteAccount();
+        AccountDeletedPage accountDeletedPage = homePage.deleteAccount();
 
-        assertEquals(deleted.getConfirmation(), "ACCOUNT DELETED!",
+        assertEquals(accountDeletedPage.getConfirmation(), "ACCOUNT DELETED!",
                 "'ACCOUNT DELETED!' should be displayed after deleting the account.");
 
-        HomePage afterDeletion = deleted.continueToHome();
+        HomePage homePageAfterDeletion = accountDeletedPage.continueToHome();
 
-        assertTrue(afterDeletion.isVisible(),
+        assertTrue(homePageAfterDeletion.isVisible(),
                 "Home page should be visible after continuing from account deletion.");
-        assertTrue(afterDeletion.isSignedOut(),
+        assertTrue(homePageAfterDeletion.isSignedOut(),
                 "User should no longer be logged in once the account is deleted.");
     }
 }

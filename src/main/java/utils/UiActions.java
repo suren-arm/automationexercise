@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
-import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -29,45 +28,39 @@ public class UiActions {
     private static final Logger LOG = LogManager.getLogger(UiActions.class);
 
     private final WebDriver driver;
-    private final WaitUtils wait;
+    private final WaitUtils waitUtils;
     private final InterruptionHandler interruptions;
 
     public UiActions(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WaitUtils(driver);
+        this.waitUtils = new WaitUtils(driver);
         this.interruptions = new InterruptionHandler(driver);
     }
 
     /**
-     * Clicks once the element is ready, recovering from ad interception.
+     * Waits for the element to be clickable and performs a native click.
      *
-     * <p>Ads load asynchronously and can cover a control between the pre-check
-     * and the click. Recovery escalates: dismiss what overlaps the element and
-     * retry, then fall back to a scripted click. The fallback is a last resort
-     * for third-party content and is logged as a warning so it cannot hide a
-     * real application defect.</p>
+     * <p>An intercepted click is retried only when the interception is
+     * confirmed to be one of the site's advertisements covering this element.
+     * Any other cause - a modal still open, a disabled control, the wrong page,
+     * a bad locator - propagates, because those are defects the suite should
+     * report rather than click through.</p>
      */
     public void click(WebElement element) {
         interruptions.dismissIfPresent();
 
-        try {
-            WebElement target = wait.clickable(element);
-            LOG.debug("Clicking {}", describe(target));
-            target.click();
-            return;
-        } catch (ElementClickInterceptedException first) {
-            LOG.warn("Click intercepted - clearing the overlay and retrying.");
-            interruptions.recoverFrom(element);
-        }
+        WebElement target = waitUtils.clickable(element);
+        LOG.debug("Clicking {}", describe(target));
 
         try {
-            WebElement target = wait.clickable(element);
-            scrollIntoView(target);
             target.click();
-        } catch (ElementClickInterceptedException second) {
-            LOG.warn("Click still intercepted after recovery - falling back to a scripted click.");
-            ((JavascriptExecutor) driver).executeScript(
-                    "arguments[0].click();", wait.visible(element));
+        } catch (ElementClickInterceptedException e) {
+            if (!interruptions.recoverFrom(element)) {
+                throw e;
+            }
+
+            LOG.warn("An advertisement was covering the element - clicking again.");
+            waitUtils.clickable(element).click();
         }
     }
 
@@ -76,33 +69,23 @@ public class UiActions {
      *
      * <p>Waits for clickable rather than visible: a painted field is not
      * necessarily ready for input, and {@code clear()} throws if it is not.
-     * Shows up mainly with a visible browser, where another worker's window can
-     * hold focus.</p>
+     * That wait is the fix - a field that is still not interactable afterwards
+     * is a genuine problem and is allowed to fail.</p>
      */
     public void type(WebElement element, String value) {
         interruptions.dismissIfPresent();
 
-        WebElement target = wait.clickable(element);
+        WebElement target = waitUtils.clickable(element);
 
         LOG.debug("Typing {} character(s) into {}", value.length(), describe(target));
 
-        try {
-            target.clear();
-            target.sendKeys(value);
-        } catch (InvalidElementStateException e) {
-            LOG.warn("Field was not ready for input - focusing it and retrying once.");
-
-            WebElement retry = wait.clickable(element);
-            scrollIntoView(retry);
-            retry.click();
-            retry.clear();
-            retry.sendKeys(value);
-        }
+        target.clear();
+        target.sendKeys(value);
     }
 
     public String getText(WebElement element) {
         interruptions.dismissIfPresent();
-        return wait.visible(element).getText();
+        return waitUtils.visible(element).getText();
     }
 
     /**
@@ -112,7 +95,7 @@ public class UiActions {
     public String getValue(WebElement element) {
         interruptions.dismissIfPresent();
 
-        String value = wait.visible(element).getDomProperty("value");
+        String value = waitUtils.visible(element).getDomProperty("value");
         return value == null ? "" : value;
     }
 
@@ -124,7 +107,7 @@ public class UiActions {
         interruptions.dismissIfPresent();
 
         try {
-            return wait.visible(element).isDisplayed();
+            return waitUtils.visible(element).isDisplayed();
         } catch (TimeoutException | NoSuchElementException e) {
             return false;
         }
@@ -134,7 +117,7 @@ public class UiActions {
         interruptions.dismissIfPresent();
 
         try {
-            return wait.visible(locator).isDisplayed();
+            return waitUtils.visible(locator).isDisplayed();
         } catch (TimeoutException | NoSuchElementException e) {
             return false;
         }
@@ -142,12 +125,12 @@ public class UiActions {
 
     public boolean isSelected(WebElement element) {
         interruptions.dismissIfPresent();
-        return wait.visible(element).isSelected();
+        return waitUtils.visible(element).isSelected();
     }
 
     public void selectByVisibleText(WebElement element, String visibleText) {
         interruptions.dismissIfPresent();
-        new Select(wait.visible(element)).selectByVisibleText(visibleText);
+        new Select(waitUtils.visible(element)).selectByVisibleText(visibleText);
     }
 
     public void scrollIntoView(WebElement element) {
@@ -155,7 +138,7 @@ public class UiActions {
 
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center'});",
-                wait.visible(element));
+                waitUtils.visible(element));
     }
 
     /**
@@ -167,7 +150,7 @@ public class UiActions {
         interruptions.dismissIfPresent();
 
         try {
-            wait.visible(locator);
+            waitUtils.visible(locator);
         } catch (TimeoutException e) {
             LOG.info("No elements matched {} within the timeout.", locator);
             return List.of();

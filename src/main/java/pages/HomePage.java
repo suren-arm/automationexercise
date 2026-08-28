@@ -27,76 +27,58 @@ public class HomePage extends BasePage {
             By.cssSelector(".features_items .product-image-wrapper a.add-to-cart");
 
     public HomePage open(String baseUrl) {
-        browser.open(baseUrl);
+        browserActions.open(baseUrl);
         return this;
     }
 
     public boolean isVisible() {
-        return actions.isDisplayed(heroText);
+        return uiActions.isDisplayed(heroText);
     }
 
     public String getHeroText() {
-        return actions.getText(heroText);
+        return uiActions.getText(heroText);
     }
 
     /** Adds the first product and closes the modal the site opens afterwards. */
     public HomePage addFirstProductToCart() {
-        WebElement addToCart = wait.visible(FIRST_PRODUCT_ADD_TO_CART);
+        WebElement addToCart = waitUtils.visible(FIRST_PRODUCT_ADD_TO_CART);
 
-        actions.scrollIntoView(addToCart);
-        actions.click(addToCart);
-        actions.click(continueShopping);
+        uiActions.scrollIntoView(addToCart);
+        uiActions.click(addToCart);
+        uiActions.click(continueShopping);
 
         return this;
     }
 
     public HomePage scrollToBottom() {
-        browser.scrollToBottom();
+        browserActions.scrollToBottom();
         return this;
     }
 
     public boolean isSubscriptionVisible() {
-        return actions.isDisplayed(subscription);
+        return uiActions.isDisplayed(subscription);
     }
-
-    public boolean isScrollUpArrowVisible() {
-        return actions.isDisplayed(scrollUpArrow);
-    }
-
-    private static final int SCROLL_UP_ATTEMPTS = 2;
 
     /**
      * Clicks the scroll-up arrow and waits for the page to settle at the top.
      *
-     * <p>The site scrolls with {@code jQuery.animate(..., 'easeOutQuad')} but
-     * never loads the easing plugin, so at a normal duration jQuery calls an
-     * easing function that does not exist and the scroll dies. Disabling
-     * animations gives the tween a zero duration, where jQuery skips the easing
-     * lookup. That flag lives on the document and an ad navigation can discard
-     * it, hence the retry.</p>
+     * <p>Animations are switched off first. The site scrolls with
+     * {@code jQuery.animate(..., 'easeOutQuad')} but never loads the easing
+     * plugin, so at a normal duration jQuery calls an easing function that does
+     * not exist and the scroll dies. A zero duration is the path where jQuery
+     * skips the easing lookup.</p>
      *
      * <p>Nothing here scrolls the page directly, so only the arrow's own
-     * handler can move it and a broken arrow still fails.</p>
+     * handler can move it.</p>
      */
     public boolean clickScrollUpArrowAndWaitForTop() {
-        for (int attempt = 1; attempt <= SCROLL_UP_ATTEMPTS; attempt++) {
-            browser.disableAnimations();
-            actions.click(scrollUpArrow);
+        browserActions.disableAnimations();
+        uiActions.click(scrollUpArrow);
 
-            if (browser.waitUntilScrolledToTop()) {
-                return true;
-            }
-
-            if (attempt < SCROLL_UP_ATTEMPTS) {
-                // Back to the bottom so the arrow is offered again.
-                browser.scrollToBottom();
-            }
-        }
-
-        return false;
+        return browserActions.waitUntilScrolledToTop();
     }
 
     public long getScrollPosition() {
-        return browser.scrollY();
+        return browserActions.scrollY();
     }
 }

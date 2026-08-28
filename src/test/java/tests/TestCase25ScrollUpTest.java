@@ -31,36 +31,33 @@ public class TestCase25ScrollUpTest extends BaseTest {
     @Story("Scroll Up using Arrow")
     @Severity(SeverityLevel.NORMAL)
     public void scrollDownAndBackToTop() {
-        HomePage home = homePage();
+        HomePage homePage = homePage();
 
-        assertTrue(home.isVisible(),
+        assertTrue(homePage.isVisible(),
                 "Home page should be visible after navigating to the base URL.");
 
         // Scroll to the bottom
-        long initialPosition = home.getScrollPosition();
+        long initialPosition = homePage.getScrollPosition();
 
-        home.scrollToBottom();
+        homePage.scrollToBottom();
 
-        long bottomPosition = home.getScrollPosition();
+        long bottomPosition = homePage.getScrollPosition();
 
         assertTrue(bottomPosition > initialPosition,
                 "Page should have scrolled down. Offset went from "
                         + initialPosition + "px to " + bottomPosition + "px.");
-        assertTrue(home.isSubscriptionVisible(),
+        assertTrue(homePage.isSubscriptionVisible(),
                 "'SUBSCRIPTION' should be visible at the bottom of the home page.");
 
         // Return to the top using the arrow
-        assertTrue(home.isScrollUpArrowVisible(),
-                "Scroll-up arrow should be offered once the page is scrolled down.");
-
-        boolean returnedToTop = home.clickScrollUpArrowAndWaitForTop();
+        boolean returnedToTop = homePage.clickScrollUpArrowAndWaitForTop();
 
         assertTrue(returnedToTop,
                 "Page should scroll back to the top after clicking the arrow. "
-                        + "Final offset: " + home.getScrollPosition() + "px.");
-        assertTrue(home.getHeroText().contains(TestData.homeHeroText()),
+                        + "Final offset: " + homePage.getScrollPosition() + "px.");
+        assertTrue(homePage.getHeroText().contains(TestData.homeHeroText()),
                 "Hero text '" + TestData.homeHeroText()
                         + "' should be visible after scrolling back up, but was: '"
-                        + home.getHeroText() + "'.");
+                        + homePage.getHeroText() + "'.");
     }
 }

@@ -7,7 +7,9 @@ import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 import pages.HomePage;
+import pages.ProductsPage;
 import tests.base.BaseTest;
 
 import java.util.List;
@@ -32,36 +34,41 @@ public class TestCase9SearchProductTest extends BaseTest {
     public void searchProduct() {
         String searchTerm = TestData.searchProduct();
 
-        HomePage home = homePage();
+        HomePage homePage = homePage();
 
-        assertTrue(home.isVisible(),
+        assertTrue(homePage.isVisible(),
                 "Home page should be visible after navigating to the base URL.");
 
         // Open the catalogue
-        var products = home.goToProducts();
+        ProductsPage productsPage = homePage.goToProducts();
 
-        assertTrue(products.isVisible(),
+        assertTrue(productsPage.isVisible(),
                 "'ALL PRODUCTS' should be visible after clicking Products.");
 
         // Search
-        products.search(searchTerm);
+        productsPage.search(searchTerm);
 
-        assertTrue(products.isSearchResultVisible(),
+        assertTrue(productsPage.isSearchResultVisible(),
                 "'SEARCHED PRODUCTS' should be visible after running a search.");
 
         // Every result must relate to the term - asserting only on the heading
         // would pass even if the site returned the unfiltered catalogue
-        List<String> resultNames = products.getResultNames();
+        List<String> resultNames = productsPage.getResultNames();
 
         assertFalse(resultNames.isEmpty(),
                 "Search for '" + searchTerm + "' should return at least one product.");
 
+        // Soft, so a single unrelated product does not hide the rest: the useful
+        // diagnostic is how many results are wrong, not just the first one.
         String expected = searchTerm.toLowerCase(Locale.ROOT);
+        SoftAssert softAssert = new SoftAssert();
 
         for (String name : resultNames) {
-            assertTrue(name.toLowerCase(Locale.ROOT).contains(expected),
+            softAssert.assertTrue(name.toLowerCase(Locale.ROOT).contains(expected),
                     "Search returned '" + name + "', which is unrelated to '"
-                            + searchTerm + "'. All results: " + resultNames);
+                            + searchTerm + "'.");
         }
+
+        softAssert.assertAll();
     }
 }

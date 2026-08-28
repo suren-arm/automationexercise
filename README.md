@@ -334,10 +334,10 @@ Framework configuration and business data are separate files (see
 user-specific is generated at runtime:
 
 - **Email addresses are unique per run.** `Account.Builder` builds
-  `automation.<timestamp>.<sequence>@example.com`. The sequence distinguishes
-  accounts created in the same millisecond, so parallel registrations cannot
-  collide and the suite can be repeated indefinitely without "email already
-  exists" failures.
+  `qa.<random><base36 timestamp><sequence>@example.com`. The timestamp makes it
+  unique across runs and the sequence across threads within the same
+  millisecond, so parallel registrations cannot collide and the suite can be
+  repeated indefinitely without "email already exists" failures.
 - **Test Case 16 creates its own user through the UI.** The official scenario
   starts by logging in, so it assumes a registered user. Rather than depending
   on Test Case 1 having run, or on a hard-coded shared account that only works
@@ -345,11 +345,38 @@ user-specific is generated at runtime:
   performs the official flow from step 4.
 - **Both account tests delete their account** as the final official step, so
   they clean up after themselves.
-- **Card details are dummy values** for this public practice site and are never
-  logged.
 
 The result is that all four tests run individually, together, in any order, and
 repeatedly.
+
+### Payment values
+
+Test Case 16 needs card details to complete the checkout form. They live in
+`testdata.properties`:
+
+```properties
+payment.card.number=4111111111111111
+payment.cvc=123
+payment.expiry.month=12
+payment.expiry.year=2030
+```
+
+These are dummy values — a well-known test card number the practice site
+accepts — and correspond to no real card or customer. They are never logged;
+`UiActions.type()` records a character count, never the value.
+
+Worth being explicit about the distinction. CVC/CVV is payment *authentication*
+data and expiry is payment-card data, so with real credentials neither belongs
+in source control. A production framework would inject them at runtime — CI/CD
+secret variables, environment variables, or a secrets manager — rather than
+reading them from a file in the repository. Passing them as command-line system
+properties is technically possible but is not the secure answer: arguments show
+up in shell history, process listings and CI logs.
+
+Keeping non-real values in `testdata.properties` here is a deliberate scope
+decision for a technical assignment. It keeps the project self-contained, so it
+can be cloned and run without configuring external secrets first. It is not a
+model for handling real payment credentials.
 
 ## Logging
 

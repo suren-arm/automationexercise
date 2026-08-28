@@ -126,27 +126,44 @@ public final class InterruptionHandler {
     }
 
     /**
-     * Recovery after a click was intercepted. Handles both shapes: a
-     * full-screen vignette is dismissed, and any banner on top of the target is
-     * hidden.
+     * Clears an advertisement that is covering the given element.
+     *
+     * <p>Handles both shapes: a full-screen vignette is dismissed, and any
+     * banner overlapping the target is hidden.</p>
+     *
+     * <p>The return value is the caller's evidence that the interception really
+     * was an advertisement. {@code false} means nothing was covering the
+     * element, so a click that failed had some other cause and the caller must
+     * not simply try again.</p>
+     *
+     * @return whether an advertisement was actually cleared
      */
-    public void recoverFrom(WebElement target) {
+    public boolean recoverFrom(WebElement target) {
+        boolean cleared = false;
+
         try {
-            if (isBlockingAdPresent() && !dismiss()) {
-                Object removed = script(REMOVE_BLOCKING_ADS);
-                LOG.warn("No close control found - removed {} blocking overlay(s).", removed);
+            if (isBlockingAdPresent()) {
+                if (!dismiss()) {
+                    Object removed = script(REMOVE_BLOCKING_ADS);
+                    LOG.warn("No close control found - removed {} blocking overlay(s).", removed);
+                }
+
+                cleared = true;
             }
 
             Object hidden = script(HIDE_ADS_OVERLAPPING_TARGET, target);
 
             if (hidden instanceof Number number && number.intValue() > 0) {
                 LOG.warn("Hid {} advertisement(s) overlapping the target element.", number);
+                cleared = true;
             }
         } catch (WebDriverException e) {
             LOG.warn("Advertisement recovery failed: {}", e.getMessage());
         } finally {
             returnToPage();
         }
+
+        return cleared;
     }
 
     private boolean isBlockingAdPresent() {

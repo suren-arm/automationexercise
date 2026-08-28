@@ -3,9 +3,7 @@ package utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
@@ -23,17 +21,17 @@ public class BrowserActions {
     private static final Duration SCROLL_SETTLE_TIMEOUT = Duration.ofSeconds(5);
 
     private final WebDriver driver;
-    private final WaitUtils wait;
+    private final WaitUtils waitUtils;
 
     public BrowserActions(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WaitUtils(driver);
+        this.waitUtils = new WaitUtils(driver);
     }
 
     public void open(String url) {
         LOG.info("Opening URL: {}", url);
         driver.get(url);
-        wait.pageLoaded();
+        waitUtils.pageLoaded();
     }
 
     /**
@@ -51,7 +49,7 @@ public class BrowserActions {
                 "window.scrollTo(0, document.body.scrollHeight);"
                         + "window.dispatchEvent(new Event('scroll'));");
 
-        wait.until(d -> scrollY() > 0);
+        waitUtils.untilTrue(() -> scrollY() > 0);
     }
 
     /**
@@ -89,16 +87,14 @@ public class BrowserActions {
     /**
      * Polls until the page settles at the top. Uses a short budget rather than
      * the global timeout: with animations off the scroll is near-instant, so
-     * anything slower has stalled and the caller should retry.
+     * anything slower has stalled and waiting longer would not help.
      */
     public boolean waitUntilScrolledToTop() {
-        try {
-            new WebDriverWait(driver, SCROLL_SETTLE_TIMEOUT)
-                    .until(d -> scrollY() <= TOP_TOLERANCE_PX);
+        if (waitUtils.untilTrue(() -> scrollY() <= TOP_TOLERANCE_PX, SCROLL_SETTLE_TIMEOUT)) {
             return true;
-        } catch (TimeoutException e) {
-            LOG.warn("Page has not scrolled back to the top. Current offset: {}px", scrollY());
-            return false;
         }
+
+        LOG.warn("Page has not scrolled back to the top. Current offset: {}px", scrollY());
+        return false;
     }
 }

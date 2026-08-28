@@ -35,37 +35,37 @@ public class LoginPage extends BasePage {
 
     /** Whether the "New User Signup!" section is displayed. */
     public boolean isSignupVisible() {
-        return actions.isDisplayed(signupHeading);
+        return uiActions.isDisplayed(signupHeading);
     }
 
     /** Whether the "Login to your account" section is displayed. */
     public boolean isLoginVisible() {
-        return actions.isDisplayed(loginHeading);
+        return uiActions.isDisplayed(loginHeading);
     }
 
     /** Enters the name and email that start registration. */
     public LoginPage enterSignup(Account account) {
-        actions.type(signupName, account.getName());
-        actions.type(signupEmail, account.getEmail());
+        uiActions.type(signupName, account.getName());
+        uiActions.type(signupEmail, account.getEmail());
         return this;
     }
 
     /** Continues to the full account form. */
     public SignupPage clickSignup() {
-        actions.click(signupButton);
+        uiActions.click(signupButton);
         return new SignupPage();
     }
 
     /** Enters existing credentials. */
     public LoginPage enterLogin(Account account) {
-        actions.type(loginEmail, account.getEmail());
-        actions.type(loginPassword, account.getPassword());
+        uiActions.type(loginEmail, account.getEmail());
+        uiActions.type(loginPassword, account.getPassword());
         return this;
     }
 
     /** Submits the login form. */
     public HomePage clickLogin() {
-        actions.click(loginButton);
+        uiActions.click(loginButton);
         return new HomePage();
     }
 }

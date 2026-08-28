@@ -37,33 +37,33 @@ public class CheckoutPage extends BasePage {
 
     /** Whether the Address Details section is displayed. */
     public boolean isAddressDetailsVisible() {
-        return actions.isDisplayed(addressDetailsHeading);
+        return uiActions.isDisplayed(addressDetailsHeading);
     }
 
     /** Whether the Review Your Order section is displayed. */
     public boolean isReviewOrderVisible() {
-        return actions.isDisplayed(reviewOrderHeading);
+        return uiActions.isDisplayed(reviewOrderHeading);
     }
 
     /** Delivery address block text, used to confirm the address is populated. */
     public String getDeliveryAddressText() {
-        return actions.getText(deliveryAddress);
+        return uiActions.getText(deliveryAddress);
     }
 
     /** Number of products listed in the order review. */
     public int getReviewedItemCount() {
-        return actions.getTexts(REVIEW_PRODUCT_ROWS).size();
+        return uiActions.getTexts(REVIEW_PRODUCT_ROWS).size();
     }
 
     /** Enters the order comment. */
     public CheckoutPage enterComment(String text) {
-        actions.type(comment, text);
+        uiActions.type(comment, text);
         return this;
     }
 
     /** Submits the order and opens the payment form. */
     public PaymentPage placeOrder() {
-        actions.click(placeOrder);
+        uiActions.click(placeOrder);
         return new PaymentPage();
     }
 }
